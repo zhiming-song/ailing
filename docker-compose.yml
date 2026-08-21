@@ -1,0 +1,14 @@
+services:
+  ailing-frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ailing-frontend
+    restart: unless-stopped
+    networks:
+      - gateway
+
+networks:
+  gateway:
+    external: true
+    name: gateway
