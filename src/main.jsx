@@ -1,10 +1,11 @@
 import { StrictMode, useState } from 'react'
 import { createRoot } from 'react-dom/client'
-import { ArrowDownRight, ArrowUpRight, BriefcaseBusiness, ChevronRight, Mail, Menu, Phone, Play, Sparkles, X } from 'lucide-react'
+import { ArrowDownRight, ArrowUpRight, Mail, Phone, Play, Sparkles } from 'lucide-react'
 import shipingImage from './assets/shiping.jpg'
 import shortMovieImage from './assets/shortMovie.jpg'
 import giftImage from './assets/gift.jpg'
 import photoImage from './assets/photo.jpg'
+import aboutPhoto from './assets/about-id-photo.jpg'
 import './styles.css'
 
 const experiences = [
@@ -22,7 +23,7 @@ const experiences = [
   },
   {
     date: '2025.07 — 2025.09',
-    company: '北京慕力科技有限公司 · 工具应用部',
+    company: '北京猿力科技有限公司 · 工具应用部',
     role: '内容营销实习生',
     bullets: ['参与 8 场平台商业化快闪活动，负责活动节点策划、现场内容及后续传播协同，累计曝光 23w+。', '参与知识类专家 IP 内容定位及选题体系搭建，推动账号涨粉 8000+。'],
   },
@@ -59,20 +60,18 @@ function MediaPlaceholder({ label = 'IMAGE / VIDEO PLACEHOLDER', className = '' 
 
 function App() {
   const [activeTab, setActiveTab] = useState('长视频')
-  const [menuOpen, setMenuOpen] = useState(false)
   const [heroOffset, setHeroOffset] = useState({ x: 0, y: 0 })
+  const [helloActive, setHelloActive] = useState(false)
+  const [activeSkill, setActiveSkill] = useState('')
 
   const scrollTo = (id) => {
-    setMenuOpen(false)
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' })
   }
 
   return (
     <main>
       <header className="site-header">
-        <button className="menu-button" aria-label="打开菜单" onClick={() => setMenuOpen(!menuOpen)}>{menuOpen ? <X size={20} /> : <Menu size={20} />}</button>
-        <button className="wordmark" onClick={() => scrollTo('top')}>LA<span> / PORTFOLIO</span></button>
-        <nav className={menuOpen ? 'is-open' : ''}>
+        <nav className="site-nav">
           <button onClick={() => scrollTo('about')}>关于我</button>
           <button onClick={() => scrollTo('experience')}>个人经历</button>
           <button onClick={() => scrollTo('work')}>个人作品</button>
@@ -95,7 +94,6 @@ function App() {
             </div>
           </div>
           <div className="hero-floating-card card-one">CONTENT<br /><b>WITH INTENT</b></div>
-          <div className="hero-floating-card card-two"><span>01</span><Sparkles size={14} /></div>
           <div className="hero-note">MOVE TO EXPLORE <span>↓</span></div>
           <div className="hero-stamp"><Sparkles size={17} /><span>OPEN<br />TO WORK</span></div>
         </div>
@@ -104,23 +102,30 @@ function App() {
         </div>
       </section>
 
-      <section id="about" className="about section-shell">
-        <div className="section-label">01 / ABOUT</div>
-        <div className="about-content">
-          <div className="about-portrait"><MediaPlaceholder label="PORTRAIT / PLACEHOLDER" /><div className="portrait-caption">YOUR PHOTO<br />GOES HERE</div></div>
-          <div className="about-copy">
-            <p className="eyebrow">HELLO, I'M AILING</p>
-            <h2>内容不是<br /><span>填充物，</span><br />是品牌和人的<br /><strong>相遇现场。</strong></h2>
-            <p className="body-copy">广播电视编导专业背景，拥有品牌传播、社交媒体运营、整合营销与视频内容制作经验。擅长从 0 到 1 搭建内容，亦能在快节奏项目中把控细节与交付。</p>
-            <div className="contact-lines"><a href="tel:18286653241"><Phone size={15} /> 182 8665 3241</a><a href="mailto:1914902866@qq.com"><Mail size={15} /> 1914902866@qq.com</a></div>
+      <section id="about" className="about about-page section-shell">
+        <div className="section-label">01 / ABOUT ME</div>
+        <div className="about-layout">
+          <aside className="about-id" aria-label="刘爱玲个人照片工牌">
+            <div className="id-clip" />
+            <div className="id-card">
+              <div className="id-photo-frame"><img src={aboutPhoto} alt="刘爱玲个人照片" /><button type="button" className={`id-bubble ${helloActive ? 'is-active' : ''}`} onClick={() => setHelloActive((active) => !active)} aria-pressed={helloActive}><span>hello!</span><Sparkles size={13} /></button></div>
+              <span className="id-shape id-shape-one" /><span className="id-shape id-shape-two" /><span className="id-shape id-shape-three" />
+            </div>
+          </aside>
+          <div className="about-panel">
+            <div className="about-intro-box"><span className="about-kicker">A LITTLE ABOUT ME</span><p>我是刘爱玲，一名内容运营，擅长视频制作、品牌传播与社交媒体内容策划。</p></div>
+            <div className="about-contact-line"><a href="tel:18286653241"><Phone size={14} /> 182 8665 3241</a><a href="mailto:1914902866@qq.com"><Mail size={14} /> 1914902866@qq.com</a></div>
+            <div className="about-info-grid">
+              <div className="about-info-block education-block"><h3>EDUCATION</h3><article><span className="info-dot" /><div><b>重庆大学</b><small>艺术学 · 硕士</small><em>2024.09 — 2027.06</em></div></article><article><span className="info-dot" /><div><b>西北民族大学</b><small>广播电视编导 · 学士</small><em>2019.09 — 2023.05</em></div></article></div>
+              <div className="about-info-block skills-block"><h3>SKILLS</h3><div className="skill-tags">{['视频制作', '用户画像', '数据分析', '热点捕捉', '英语六级', '剪映', '即梦', '可画'].map((skill) => <button type="button" className={`skill-tag ${activeSkill === skill ? 'is-active' : ''}`} key={skill} onClick={() => setActiveSkill((current) => current === skill ? '' : skill)} aria-pressed={activeSkill === skill}>{skill}</button>)}</div></div>
+            </div>
           </div>
         </div>
       </section>
 
       <section id="experience" className="experience section-shell">
         <div className="section-label">02 / EXPERIENCE</div>
-        <div className="experience-heading"><h2>把每一次<br /><i>传播机会</i>，做成<br />有效的内容。</h2><p>EDUCATION<br /><b>2024.09 — 2027.06</b><br />重庆大学 · 艺术学 硕士<br /><br /><b>2019.09 — 2023.05</b><br />西北民族大学 · 广播电视编导</p></div>
-        <div className="timeline">{experiences.map((item) => <article className="experience-row" key={item.date}><div className="experience-meta"><span>{item.date}</span><BriefcaseBusiness size={17} /></div><div><h3>{item.company}</h3><p className="role">{item.role}</p>{item.bullets.map((bullet) => <p className="bullet" key={bullet}>{bullet}</p>)}</div><ChevronRight className="row-arrow" size={20} /></article>)}</div>
+        <div className="experience-card-grid">{experiences.map((item, index) => <article className={`experience-card experience-card-${index + 1}`} key={item.date} onMouseMove={(event) => { const rect = event.currentTarget.getBoundingClientRect(); const x = ((event.clientX - rect.left) / rect.width - .5) * 9; const y = ((event.clientY - rect.top) / rect.height - .5) * 7; event.currentTarget.style.setProperty('--card-x', `${x}px`); event.currentTarget.style.setProperty('--card-y', `${y}px`) }} onMouseLeave={(event) => { event.currentTarget.style.setProperty('--card-x', '0px'); event.currentTarget.style.setProperty('--card-y', '0px') }}><div className="experience-card-top"><span>0{index + 1}</span><em>{item.date}</em></div><h3>{item.company}</h3><p className="role">{item.role}</p><div className="experience-card-divider" /> <div className="experience-card-copy">{item.bullets.map((bullet) => <p key={bullet}>{bullet}</p>)}</div></article>)}</div>
       </section>
 
       <section id="work" className="work section-shell">
