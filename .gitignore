@@ -1,0 +1,22 @@
+# Dependencies and build outputs
+**/node_modules/
+**/dist/
+**/coverage/
+
+# Local environment and logs
+**/.env
+**/.env.*
+!**/.env.example
+**/*.log
+
+# Runtime data
+**/*.db
+nginx-gateway/data/
+
+# Editor and operating-system files
+.agents/
+**/.DS_Store
+**/.idea/
+**/.vscode/
+**/__pycache__/
+**/*.pyc
