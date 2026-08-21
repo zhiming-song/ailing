@@ -73,7 +73,7 @@ function App() {
           <button onClick={() => scrollTo('experience')}>个人经历</button>
           <button onClick={() => scrollTo('work')}>个人作品</button>
         </nav>
-        <button className="avatar-button" onClick={() => scrollTo('about')} aria-label="查看关于我"><img src="/media/avatar-full.png" alt="刘爱玲头像" /></button>
+        <button className="avatar-button" onClick={() => scrollTo('about')} aria-label="查看关于我"><img src={`${import.meta.env.BASE_URL}media/avatar-full.png`} alt="刘爱玲头像" /></button>
       </header>
 
       <section id="top" className="hero section-shell" onMouseMove={(event) => { const rect = event.currentTarget.getBoundingClientRect(); setHeroOffset({ x: ((event.clientX - rect.left) / rect.width - .5) * 14, y: ((event.clientY - rect.top) / rect.height - .5) * 10 }) }} onMouseLeave={() => setHeroOffset({ x: 0, y: 0 })}>
