@@ -96,7 +96,7 @@ function App() {
           <div className="hero-stamp"><Sparkles size={17} /><span>OPEN<br />TO WORK</span></div>
         </div>
         <div className="project-orbit" aria-label="项目作品入口">
-          {[['长视频','work-video'], ['短视频','work-short'], ['直播礼物','work-live'], ['图片作品','work-image']].map(([label, id], index) => <button key={id} className={`project-orbit-item orbit-${index + 1}`} onClick={() => { setActiveTab(label); scrollTo('work') }}><span className="orbit-image"><span>0{index + 1}</span></span><small>{label}</small></button>)}
+          {[['长视频', 'work-video', '/src/assets/shiping.jpg'], ['短视频', 'work-short', '/src/assets/shortMovie.jpg'], ['直播礼物', 'work-live', '/src/assets/gift.jpg'], ['图片作品', 'work-image', '/src/assets/photo.jpg']].map(([label, id, image], index) => <button key={id} className={`project-orbit-item orbit-${index + 1}`} onClick={() => { setActiveTab(label); scrollTo('work') }}><span className="orbit-image"><img src={image} alt="" /></span><small>{label}</small></button>)}
         </div>
       </section>
 

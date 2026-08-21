@@ -30,7 +30,7 @@ nav { display: flex; gap: 34px; margin-left: auto; margin-right: 48px; } nav but
 /* Shared page background */
 body {
   background-color: var(--paper);
-  background-image: url('./assets/background.png');
+  background-image: url('./assets/background.jpg');
   background-position: center;
   background-size: cover;
   background-repeat: no-repeat;
@@ -39,3 +39,9 @@ body {
 .hero { background: transparent; }
 .experience, .work { background: transparent; }
 .contact { background: rgba(68, 83, 73, .78); }
+
+/* Project entry thumbnails */
+body { background-image: url('./assets/background.jpg'); }
+.orbit-image { overflow: hidden; }
+.orbit-image img { position: absolute; inset: 0; z-index: 0; width: 100%; height: 100%; object-fit: cover; }
+.orbit-image::before { content: none; }
