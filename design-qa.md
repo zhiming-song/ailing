@@ -9,6 +9,7 @@
 - Media placeholders are intentional and ready for later photo/video replacement.
 - Homepage v2 checked with a fixed blurred background, movable foreground layer, top-right avatar, three header entries, and four circular project entry points.
 - Header avatar uses the original photo with its bathroom/mirror background preserved in `public/media/avatar-full.png`.
+- About page skill tags use loose positioning with hover, floating motion, and click-selected feedback matching the `hello!` interaction.
 
 ## Result
 
