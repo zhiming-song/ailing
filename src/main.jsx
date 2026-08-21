@@ -1,6 +1,10 @@
 import { StrictMode, useState } from 'react'
 import { createRoot } from 'react-dom/client'
 import { ArrowDownRight, ArrowUpRight, BriefcaseBusiness, ChevronRight, Mail, Menu, Phone, Play, Sparkles, X } from 'lucide-react'
+import shipingImage from './assets/shiping.jpg'
+import shortMovieImage from './assets/shortMovie.jpg'
+import giftImage from './assets/gift.jpg'
+import photoImage from './assets/photo.jpg'
 import './styles.css'
 
 const experiences = [
@@ -96,7 +100,7 @@ function App() {
           <div className="hero-stamp"><Sparkles size={17} /><span>OPEN<br />TO WORK</span></div>
         </div>
         <div className="project-orbit" aria-label="项目作品入口">
-          {[['长视频', 'work-video', '/src/assets/shiping.jpg'], ['短视频', 'work-short', '/src/assets/shortMovie.jpg'], ['直播礼物', 'work-live', '/src/assets/gift.jpg'], ['图片作品', 'work-image', '/src/assets/photo.jpg']].map(([label, id, image], index) => <button key={id} className={`project-orbit-item orbit-${index + 1}`} onClick={() => { setActiveTab(label); scrollTo('work') }}><span className="orbit-image"><img src={image} alt="" /></span><small>{label}</small></button>)}
+          {[['长视频', 'work-video', shipingImage], ['短视频', 'work-short', shortMovieImage], ['直播礼物', 'work-live', giftImage], ['图片作品', 'work-image', photoImage]].map(([label, id, image], index) => <button key={id} className={`project-orbit-item orbit-${index + 1}`} onClick={() => { setActiveTab(label); scrollTo('work') }}><span className="orbit-image"><img src={image} alt="" /></span><small>{label}</small></button>)}
         </div>
       </section>
 
