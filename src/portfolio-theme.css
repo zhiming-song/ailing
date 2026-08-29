@@ -1,0 +1,214 @@
+/* One shared palette, without changing the established layouts or media. */
+:root {
+  --portfolio-bg: #081a1c;
+  --portfolio-surface: #142c2f;
+  --portfolio-glass: rgba(22, 47, 50, .84);
+  --portfolio-text: #f6f7ef;
+  --portfolio-muted: #b8c9c5;
+  --portfolio-accent: #dbf52b;
+  --portfolio-border: #405957;
+  --portfolio-font: Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  --ink: var(--portfolio-text);
+  --muted: var(--portfolio-muted);
+  --paper: var(--portfolio-bg);
+  --line: var(--portfolio-border);
+  font-family: var(--portfolio-font);
+  color: var(--portfolio-text);
+  background: var(--portfolio-bg);
+  color-scheme: dark;
+}
+
+html, body { background: var(--portfolio-bg); }
+body::before { background: url('./assets/portfolio-background.jpg') center / cover no-repeat; opacity: .07; filter: blur(60px); }
+body::after { background: transparent; box-shadow: inset -24vw 0 24vw rgba(0,0,0,.4); }
+::selection { background: var(--portfolio-accent); color: var(--portfolio-bg); }
+:focus-visible { outline: 2px solid var(--portfolio-accent); outline-offset: 5px; }
+#about, #experience, #work { scroll-margin-top: 76px; }
+
+/* Keep the experience-to-work transition compact and proportional. */
+.experience { padding-bottom: 0; overflow: visible; overscroll-behavior-y: auto; }
+.work { padding-top: clamp(18px, 2.2vw, 30px); }
+.experience-timeline { padding-bottom: 0; }
+.work .card-spread-gallery { min-height: 500px; margin-top: 8px; padding-top: 12px; padding-bottom: 8px; }
+.work .card-spread-gallery-deck { height: 420px; }
+.work .card-spread-gallery-card { bottom: 16px; }
+@media (max-width: 800px) {
+  .experience { padding-bottom: 0; }
+  .work { padding-top: 18px; }
+  .experience-timeline { padding-bottom: 4px; }
+  .work .card-spread-gallery { min-height: 450px; margin-top: 6px; padding-top: 10px; padding-bottom: 6px; }
+  .work .card-spread-gallery-deck { height: 390px; }
+  .work .card-spread-gallery-card { bottom: 12px; }
+}
+
+/* Homepage palette carried into the About, Experience, Work, and Contact sections. */
+.about-page, .experience, .work, .contact { color: var(--portfolio-text); background: transparent; }
+.experience { position: relative; }
+.experience-sticky-intro { position: sticky; top: 0; z-index: 12; padding: 104px 0 18px; background: #081a1c; box-shadow: 0 12px 18px rgba(8, 26, 28, .98); }
+.experience-sticky-intro .section-label { margin: 0; }
+.experience-sticky-kicker { margin: 16px 0 0; color: var(--portfolio-accent); font: 800 13px 'DM Mono'; letter-spacing: .17em; }
+.experience > .experience-journey-heading { margin-top: 36px; margin-bottom: 0; }
+.experience > .experience-journey-heading h2 { margin-top: 0; }
+.experience-timeline { padding-bottom: 0; }
+.experience-item-4 { margin-bottom: 0; }
+.experience-timeline-line { bottom: 0; }
+.experience-item { opacity: .46; transform: translateY(24px); transition: opacity .55s ease, transform .65s cubic-bezier(.2, .8, .2, 1); }
+.experience-item.is-visible { opacity: 1; transform: translateY(0); }
+.experience-item.is-visible .experience-node { box-shadow: 0 0 0 8px #0d201dcc, 0 0 32px color-mix(in srgb, var(--portfolio-accent, #dbf52b) 62%, transparent); }
+@media (max-width: 800px) {
+  .experience-sticky-intro { top: 0; padding: 82px 0 16px; }
+  .experience-sticky-kicker { margin-top: 12px; font-size: 10px; }
+  .experience > .experience-journey-heading { margin-top: 24px; }
+  .experience-timeline { padding-bottom: 0; }
+  .experience-timeline-line { bottom: 0; }
+  .experience-item { transform: translateY(16px); }
+}
+.section-label, .contact .section-label, .detail-section-label {
+  color: var(--portfolio-accent);
+  border-color: var(--portfolio-border);
+  text-shadow: none;
+}
+/* Advantages section: loose keyword cards inspired by the supplied reference. */
+.about-page { background: #071317; }
+.about-page .section-label { border-color: #304247; }
+.advantages-heading { margin: 24px 0 54px; }
+.advantages-heading p { margin: 0 0 24px; color: var(--portfolio-accent); font: 800 11px 'DM Mono'; letter-spacing: .2em; }
+.advantages-heading h2 { margin: 0; color: var(--portfolio-text); font: 700 clamp(48px, 7vw, 106px)/.94 'Manrope', var(--portfolio-font); letter-spacing: -.075em; }
+.advantages-heading h2 i { color: var(--portfolio-text); font-style: normal; }
+.advantages-heading > span { display: block; margin-top: 22px; color: #9eafaa; font-size: 15px; }
+.advantages-grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 18px 26px; margin: 0 auto; max-width: 1480px; align-items: start; }
+.advantage-card { --card-x: 0px; --card-y: 0px; position: relative; min-height: 360px; padding: 31px 29px 26px; border: 1px solid #3c4e50; border-radius: 22px; background: rgba(17, 31, 34, .8); color: #eef5ec; transform: translate3d(var(--card-x), var(--card-y), 0) rotate(var(--card-rotate, 0deg)); transition: transform .28s cubic-bezier(.2,.8,.2,1), box-shadow .28s ease, background .28s ease; cursor: default; overflow: hidden; }
+.advantage-card::after { content: ''; position: absolute; inset: auto 22px 18px auto; width: 30px; height: 30px; border: 2px solid var(--portfolio-accent); border-radius: 50%; opacity: .9; }
+.advantage-card:hover { background: var(--portfolio-accent); border-color: var(--portfolio-accent); color: #263820; box-shadow: 0 22px 38px #0007, 0 0 0 5px #dbf52b22; transform: translate3d(var(--card-x), calc(var(--card-y) - 8px), 0) rotate(0deg) scale(1.02); }
+.advantage-card:hover .advantage-card-index, .advantage-card:hover h3, .advantage-card:hover p, .advantage-card:hover .advantage-card-close { color: #263820; }
+.advantage-card-index { display: block; color: var(--portfolio-accent); font: 800 10px 'DM Mono'; letter-spacing: .18em; }
+.advantage-card-close { position: absolute; top: 28px; right: 27px; color: #718184; font-size: 25px; line-height: .7; }
+.advantage-icon { display: none; }
+.advantage-card h3 { margin: 38px 0 25px; color: var(--portfolio-text); font: 700 clamp(24px, 2.3vw, 40px)/1.05 'Manrope', var(--portfolio-font); letter-spacing: -.06em; }
+.advantage-card ul { display: grid; gap: 15px; margin: 0; padding: 0; list-style: none; color: #9caeaa; font-size: 14px; line-height: 1.55; }
+.advantage-card li { position: relative; padding-left: 22px; }
+.advantage-card li::before { content: '0' counter(advantage-point); counter-increment: advantage-point; position: absolute; left: 0; color: var(--portfolio-accent); font: 10px 'DM Mono'; }
+.advantage-card { counter-reset: advantage-point; }
+.advantage-card-1, .advantage-card-2, .advantage-card-3 { grid-column: span 4; --card-rotate: 0deg; }
+.advantages-education { margin-top: 28px; }
+.advantages-education .education-block { padding: 18px 22px; border: 1px solid #5a7270; border-radius: 20px; background: var(--portfolio-glass); }
+.advantages-education .education-block h3 { color: var(--portfolio-accent); font-family: var(--portfolio-font); font-size: 11px; letter-spacing: .15em; margin: 0 0 12px; }
+.advantages-education .education-block article { display: flex; align-items: flex-start; gap: 10px; margin: 8px 0; }
+.advantages-education .education-block b { color: var(--portfolio-text); font-size: 15px; }
+.advantages-education .education-block small { color: var(--portfolio-muted); font-size: 12px; display: block; }
+.advantages-education .education-block em { display: inline-block; margin-top: 2px; padding: 2px 8px; border-radius: 999px; background: #293b2b; color: #e4efb4; font-style: normal; font-size: 10px; }
+.advantages-education .info-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--portfolio-accent); flex-shrink: 0; margin-top: 6px; }
+@media (max-width: 800px) { .advantages-grid { grid-template-columns: repeat(2, 1fr); gap: 14px; }.advantage-card, .advantage-card:nth-child(n) { grid-column: auto; min-height: 300px; }.advantages-heading { margin-bottom: 34px; } }
+@media (max-width: 500px) { .advantages-grid { grid-template-columns: 1fr; }.advantage-card, .advantage-card:nth-child(n) { grid-column: 1; min-height: 260px; }.advantage-card h3 { margin-top: 31px; } }
+
+.about-intro-box, .about-info-block, .about-info-block + .about-info-block {
+  background: var(--portfolio-glass);
+  border-color: var(--portfolio-border);
+  box-shadow: 0 14px 28px #0002, inset 0 1px 0 #ffffff0d;
+}
+.about-kicker, .about-info-block h3 { color: var(--portfolio-accent); text-shadow: none; }
+.about-intro-box p, .education-block b { color: var(--portfolio-text); text-shadow: none; }
+.education-block small { color: var(--portfolio-muted); text-shadow: none; }
+.education-block em { background: #293b2b; color: #e4efb4; box-shadow: none; }
+.info-dot { background: var(--portfolio-accent); border-color: var(--portfolio-accent); }
+.skill-tag:nth-child(n) { color: var(--portfolio-text); background: #233e40; border-color: #55716a; box-shadow: 3px 4px 0 #0002; }
+.skill-tag:nth-child(n):hover, .skill-tag:nth-child(n).is-active { background: var(--portfolio-accent); color: #172511; border-color: var(--portfolio-accent); }
+.skill-tag, .about-info-block h3, .education-block b { font-family: var(--portfolio-font); }
+
+.experience-card { background: var(--portfolio-glass); border-color: #5a7270; box-shadow: 0 16px 28px #0003, inset 0 1px 0 #ffffff14; }
+.experience-card:hover { background: rgba(34, 64, 65, .92); box-shadow: 0 28px 48px #0004, 0 0 0 7px #dbf52b0d, inset 0 1px 0 #ffffff20; }
+.experience-card::before { background: #ffffff06; }
+.experience-card h3 { color: var(--portfolio-text); font-family: var(--portfolio-font); text-shadow: none; }
+.experience-card-top em, .experience-card .role { color: var(--portfolio-accent); text-shadow: none; }
+.experience-summary, .experience-card-copy p { color: #dbe5df; text-shadow: none; }
+.experience-card-copy { background: #071b1dab; border-color: #46605a; }
+.experience-card-copy p::before { color: var(--portfolio-accent); }
+.experience-timeline-line { background: #b0c0b9; box-shadow: 0 0 0 5px #ffffff08; }
+.experience-timeline-line::before, .experience-timeline-line::after { background: var(--portfolio-accent); border-color: #e9f4aa; }
+/* Keep the supplied company logos and the About lanyard's original materials. */
+.experience-logo { background: #f6f7ef; box-shadow: 0 10px 20px #0002; }
+
+.card-spread-gallery::before { background: none; }
+.card-spread-gallery-hint { color: var(--portfolio-muted); background: var(--portfolio-glass); border-color: var(--portfolio-border); }
+.card-spread-gallery-card { background: var(--portfolio-surface); border-color: #91a29c; box-shadow: 0 20px 31px #0004, inset 0 1px 0 #ffffff30; }
+.card-spread-gallery-card.is-active { box-shadow: 0 33px 42px #0005, 0 0 0 6px #dbf52b18, inset 0 1px 0 #ffffff40; }
+.card-spread-gallery-card-meta b { font-family: var(--portfolio-font); }
+.card-spread-gallery-pagination { color: var(--portfolio-muted); }
+.card-spread-gallery-pagination .is-active { color: var(--portfolio-accent); text-shadow: none; }
+.contact h2, .contact h2 i { color: var(--portfolio-text); font-family: var(--portfolio-font); }
+.contact h2 i { color: var(--portfolio-accent); }
+.contact .eyebrow, .contact-footer { color: var(--portfolio-muted); }
+.contact-footer { border-color: var(--portfolio-border); }
+.contact-button { border-color: var(--portfolio-accent); color: var(--portfolio-accent); }
+.contact-button:hover { background: var(--portfolio-accent); color: var(--portfolio-bg); }
+
+/* Closing contact page: a direct, employment-focused ending to the portfolio journey. */
+.contact-page { position: relative; isolation: isolate; min-height: min(760px, 100svh); padding: clamp(58px, 6vw, 104px) max(4%, calc((100% - 1700px) / 2 + 4%)) 30px; overflow: hidden; background: radial-gradient(circle at 78% 34%, rgba(143, 184, 57, .2), transparent 29%), #081a1c; }
+.contact-page .section-label { position: relative; z-index: 1; padding-top: 0; border: 0; }
+.contact-page .contact-layout { position: relative; z-index: 1; display: block; flex: 1; margin: auto 0; }
+.contact-page .contact-content { margin: 0; }
+.contact-page .eyebrow { margin: 0 0 22px; color: #bdc9c4; font: 800 13px 'DM Mono'; letter-spacing: .2em; }
+.contact-page h2 { max-width: none; margin: 0; color: #f5f7ed; font: 700 clamp(58px, 8.2vw, 142px) / .98 var(--portfolio-font); letter-spacing: -.09em; white-space: nowrap; }
+.contact-page h2 i { color: #f5f7ed; font-style: normal; }
+.contact-page .contact-description { max-width: 680px; margin: 30px 0 0; color: #c6d0cc; font-size: clamp(15px, 1.35vw, 20px); line-height: 1.75; }
+.contact-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 34px; }
+.contact-page .contact-button { min-height: 48px; padding: 13px 20px; border: 1px solid #536867; border-radius: 999px; color: #e8efea; background: rgba(8, 26, 28, .56); font: 700 12px 'DM Mono'; letter-spacing: .08em; }
+.contact-page .contact-email-button { border-color: var(--portfolio-accent); color: var(--portfolio-accent); }
+.contact-page .contact-email-button:hover { background: var(--portfolio-accent); color: #10201c; }
+.contact-page .contact-resume-button { border-color: var(--portfolio-accent); color: #1d2c19; background: var(--portfolio-accent); cursor: not-allowed; opacity: .72; transform: none; }
+.contact-page .contact-resume-button span { margin-left: 5px; opacity: .62; font-size: 9px; }
+.contact-email-address { display: inline-block; align-self: center; border-bottom: 1px solid rgba(219,245,43,.58); padding-bottom: 5px; color: #c8d4cf; font: 12px 'DM Mono'; letter-spacing: .06em; transition: color .2s ease, border-color .2s ease; }
+.contact-email-address:hover { border-color: var(--portfolio-accent); color: var(--portfolio-accent); }
+.contact-tags { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 30px; }
+.contact-tags span { padding: 9px 15px; border: 1px solid #405957; border-radius: 999px; color: #b8c9c5; font-size: 13px; }
+.contact-card { position: relative; justify-self: end; width: min(100%, 390px); min-height: 360px; display: flex; flex-direction: column; justify-content: space-between; padding: 32px; border: 1px solid #536867; border-radius: 30px; color: #eaf1e8; background: linear-gradient(145deg, rgba(38, 51, 37, .76), rgba(16, 25, 28, .9)); box-shadow: 0 24px 52px rgba(0, 0, 0, .25), inset 0 1px 0 rgba(255,255,255,.08); }
+.contact-card small { color: var(--portfolio-accent); font: 800 10px 'DM Mono'; letter-spacing: .16em; }
+.contact-card b { font: 700 clamp(30px, 3vw, 48px) / 1.05 var(--portfolio-font); letter-spacing: -.07em; }
+.contact-card p { margin: 0; color: #aebdb8; font-size: 14px; line-height: 1.65; }
+.contact-card a { width: fit-content; border-bottom: 1px solid var(--portfolio-accent); padding-bottom: 6px; color: #eff5ec; font: 11px 'DM Mono'; letter-spacing: .06em; }
+.contact-page .contact-bg-word { z-index: -1; right: -2%; bottom: -6%; top: auto; color: transparent; font: 700 clamp(130px, 19vw, 330px) / .8 var(--portfolio-font); letter-spacing: -.12em; -webkit-text-stroke: 1px rgba(206, 220, 211, .09); }
+.contact-page .contact-footer { position: relative; z-index: 1; margin-top: 32px; padding-top: 16px; }
+@media (max-width: 800px) { .contact-page { min-height: auto; padding: 72px 24px 28px; }.contact-page .contact-layout { margin: 46px 0 0; }.contact-page h2 { font-size: clamp(46px, 13vw, 74px); white-space: normal; }.contact-page .contact-description { margin-top: 22px; font-size: 15px; }.contact-page .contact-footer { margin-top: 32px; }.contact-page .contact-bg-word { font-size: 28vw; bottom: 3%; } }
+
+/* Collection pages: existing carousels and playback controls, coordinated surfaces. */
+.site-header.detail-header { background: rgba(10,28,30,.92); border-color: var(--portfolio-border); }
+.detail-back { color: var(--portfolio-text); font-family: var(--portfolio-font); }
+.detail-back:hover { color: var(--portfolio-accent); }
+.detail-index { color: var(--portfolio-muted); }
+.short-film-page { background: transparent; color: var(--portfolio-text); }
+.short-film-depth-heading h1, .short-film-depth-card footer b { font-family: var(--portfolio-font); }
+.short-film-depth-heading h1 { color: var(--portfolio-accent); text-shadow: none; }
+.short-film-depth-heading p, .short-film-depth-heading > span { color: var(--portfolio-muted); }
+.short-film-depth-card { background: var(--portfolio-bg); border-color: #59736d; }
+.short-film-depth-card footer { background: var(--portfolio-surface); border-color: var(--portfolio-border); }
+.short-film-depth-card footer small, .short-film-depth-card footer em { color: var(--portfolio-muted); }
+.short-film-depth-controls button { color: var(--portfolio-accent); background: var(--portfolio-glass); border-color: #617669; }
+1.short-film-depth-controls button:hover { color: var(--portfolio-bg); background: var(--portfolio-accent); }
+.short-film-depth-controls span { color: var(--portfolio-muted); }
+.short-film-depth-controls span b { color: var(--portfolio-accent); }
+.short-film-depth-play { background: #081a1ca8; border-color: #d9e5c2; }
+.short-film-depth-play:hover { background: #213f3fcc; }
+
+/* Keep the image gallery's reactive color glow, softly against the shared dark base. */
+.image-works-page { background: var(--portfolio-bg); }
+.image-works-page::before { opacity: .25; }
+.image-works-gradient { opacity: .16; }
+.image-works-page::after { background: rgba(8,26,28,.36); }
+.image-works-intro { top: 102px; max-width: min(540px, calc(100vw - 44px)); color: var(--portfolio-text); font-family: var(--portfolio-font); }
+.image-works-carousel { padding-top: 140px; }
+.image-works-stage { height: min(70svh, 740px); min-height: 400px; }
+.image-works-card { background: var(--portfolio-surface); border-color: #8b9f94; }
+.image-works-card.is-active { border-color: #d3e894; }
+
+/* Live Gift is the intentional exception: preserve the cloud imagery and blur. */
+.live-gift-cinema { background: var(--portfolio-bg); color: var(--portfolio-text); }
+.live-gift-cinema-header { color: var(--portfolio-text); font-family: var(--portfolio-font); }
+.live-gift-cinema-header a:hover { color: var(--portfolio-accent); }
+.live-gift-cinema-header span { color: #d6e0d9; }
+.live-gift-title-rail h1 { color: var(--portfolio-text); font-family: var(--portfolio-font); }
+.live-gift-title-rail span { color: var(--portfolio-accent); }
+.live-gift-title-rail i { background: var(--portfolio-accent); }
+.live-gift-player-tools button { background: #102d3299; }
+.live-gift-player-tools button:hover { background: #254946c7; }
+
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
