@@ -183,7 +183,7 @@ body::after { background: transparent; box-shadow: inset -24vw 0 24vw rgba(0,0,0
 .short-film-depth-card footer { background: var(--portfolio-surface); border-color: var(--portfolio-border); }
 .short-film-depth-card footer small, .short-film-depth-card footer em { color: var(--portfolio-muted); }
 .short-film-depth-controls button { color: var(--portfolio-accent); background: var(--portfolio-glass); border-color: #617669; }
-1.short-film-depth-controls button:hover { color: var(--portfolio-bg); background: var(--portfolio-accent); }
+.short-film-depth-controls button:hover { color: var(--portfolio-bg); background: var(--portfolio-accent); }
 .short-film-depth-controls span { color: var(--portfolio-muted); }
 .short-film-depth-controls span b { color: var(--portfolio-accent); }
 .short-film-depth-play { background: #081a1ca8; border-color: #d9e5c2; }

@@ -11,7 +11,7 @@ import homePortraitNeon from './assets/home-portrait-neon.png'
 import lanyardReferenceStrip from './assets/lanyard-reference-strip.png'
 import workLiveGiftImage from './assets/work-live-gift.jpg'
 import workShortFilmImage from './assets/work-short-film.jpg'
-import workShortVideoImage from './assets/work-short-video.jpg'
+import workShortVideoImage from './assets/work-short-video-cover-et5.png'
 import workImageWorksImage from './assets/work-image-works.png'
 import imageGray from './assets/image-works/gray.png'
 import imageGoldOne from './assets/image-works/gold-1.png'
@@ -299,31 +299,31 @@ function ImageWorksCarousel() {
 }
 
 const shortFilmVideos = [
-  { title: '《舍得》', label: 'SHORT FILM', src: `${import.meta.env.BASE_URL}videos/shede.m4v`, poster: `${import.meta.env.BASE_URL}videos/shede-poster.png`, description: '以陌陌官方歌曲《舍得》为情绪线索，拍摄一段关于“舍”与“得”的音乐短片。故事在靠近与放下之间展开，让歌曲里的情感纠葛落到更具体的人物关系中。' },
-  { title: '《我们都是追梦人》', label: 'PROMOTIONAL FILM', src: `${import.meta.env.BASE_URL}videos/dreamers.m4v`, poster: `${import.meta.env.BASE_URL}videos/dreamers-poster.png`, description: '根据真实校友经历改编，从一个人的成长选择切入，讲述贵州经贸职院学子一路向前的过程。影片以小见大，让招生宣传不止介绍校园，也呈现学校的人文温度与成长陪伴。' },
+  { title: '音乐短片', label: 'SHORT FILM', src: `${import.meta.env.BASE_URL}videos/shede.m4v`, poster: `${import.meta.env.BASE_URL}videos/shede-poster.png`, description: '以陌陌官方歌曲《舍得》为情绪线索，拍摄一段关于“舍”与“得”的音乐短片。故事在靠近与放下之间展开，让歌曲里的情感纠葛落到更具体的人物关系中。' },
+  { title: '招生宣传片', label: 'PROMOTIONAL FILM', src: `${import.meta.env.BASE_URL}videos/dreamers.m4v`, poster: `${import.meta.env.BASE_URL}videos/dreamers-poster.png`, description: '根据真实校友经历改编，从一个人的成长选择切入，讲述贵州经贸职院学子一路向前的过程。影片以小见大，让招生宣传不止介绍校园，也呈现学校的人文温度与成长陪伴。' },
   { title: '企业宣传片', label: 'CORPORATE FILM', src: `${import.meta.env.BASE_URL}videos/corporate.m4v`, poster: `${import.meta.env.BASE_URL}videos/corporate-poster.png`, description: '从业务场景、服务内容与团队协作出发，梳理公司的核心能力。用清晰、有节奏的画面，让观众快速理解企业正在做什么，以及能为客户带来什么。' },
 ]
 
 const shortVideoVideos = [
-  { title: 'AI全系车色', label: 'SHORT VIDEO', src: `${import.meta.env.BASE_URL}videos/short-video/ai-colors.mp4`, poster: `${import.meta.env.BASE_URL}videos/short-video/ai-colors-poster.png`, description: '围绕新车上市，为不同车色匹配城市标志性建筑与场景氛围。让车型在熟悉的城市地标中亮相，也让每一种颜色都有更鲜明的记忆点。' },
-  { title: '主播样片', label: 'SHORT VIDEO', src: `${import.meta.env.BASE_URL}videos/short-video/host-sample.mp4`, poster: `${import.meta.env.BASE_URL}videos/short-video/host-sample-poster.png`, description: '“人生潇洒肆意游，开台 ES8 解你愁。”把车型信息写进顺口的句子里，让观众在听懂产品亮点的同时，也感受到内容的节奏和趣味。' },
+  { title: 'AI全系车色', label: 'SHORT VIDEO', src: `${import.meta.env.BASE_URL}videos/short-video/ai-colors.mp4`, poster: `${import.meta.env.BASE_URL}videos/short-video/ai-colors-poster.png`, description: '围绕新车上市，用 AI + 城市地标的形式提升每一种车色的辨识度，全网曝光量 15 万。' },
+  { title: '主播样片', label: 'SHORT VIDEO', src: `${import.meta.env.BASE_URL}videos/short-video/host-sample.mp4`, poster: `${import.meta.env.BASE_URL}videos/short-video/host-sample-poster.png`, description: '“人生潇洒肆意游，开台 ES8 解你愁”，通过朗朗上口的押韵口播与产品特色结合，增加视频的可看性，全网曝光量 5 万+。' },
   { title: '雪山狐狸', label: 'SHORT VIDEO', src: `${import.meta.env.BASE_URL}videos/short-video/snow-fox.mp4`, poster: `${import.meta.env.BASE_URL}videos/short-video/snow-fox-poster.png`, description: '结合“雪山狐狸”热点，将雪地、狐狸与产品信息放进同一段内容里。先用热点画面吸引停留，再通过场景和文案自然带出产品卖点。' },
-  { title: '节目预热—西游记混剪', label: 'SHORT VIDEO', src: `${import.meta.env.BASE_URL}videos/short-video/journey-west.mov`, poster: `${import.meta.env.BASE_URL}videos/short-video/journey-west-poster.png`, description: '根据节目受众选择《西游记》这一熟悉入口，将经典桥段与节目内容重新拼接。观众先因熟悉感产生兴趣，再通过有趣混剪理解节目亮点。' },
-  { title: '飞驰人生转场', label: 'SHORT VIDEO', src: `${import.meta.env.BASE_URL}videos/short-video/pegasus-transition.mp4`, poster: `${import.meta.env.BASE_URL}videos/short-video/pegasus-transition-poster.png`, description: '从《飞驰人生》的经典名场面中提取速度感与情绪节奏，再将车辆画面延展到城市地标场景。用熟悉的电影记忆连接本地城市，让内容更有代入感。' },
+  { title: '混剪预热', label: 'SHORT VIDEO', src: `${import.meta.env.BASE_URL}videos/short-video/journey-west.mov`, poster: `${import.meta.env.BASE_URL}videos/short-video/journey-west-poster.png`, description: '根据节目受众选择《西游记》这一熟悉入口，将经典桥段与节目内容重新拼接。观众先因熟悉感产生兴趣，再通过有趣混剪了解节目信息。' },
+  { title: '飞驰人生转场', label: 'SHORT VIDEO', src: `${import.meta.env.BASE_URL}videos/short-video/pegasus-transition.mp4`, poster: `${import.meta.env.BASE_URL}videos/short-video/pegasus-transition-poster.png`, description: '从《飞驰人生》的经典名场面中提取速度感与情绪节奏，用熟悉的电影记忆连接本地城市，让内容更有代入感，全网曝光量 7 万+。' },
   { title: '果蝇恋爱', label: 'SHORT VIDEO', src: `${import.meta.env.BASE_URL}videos/short-video/fruit-fly-love.mp4`, poster: `${import.meta.env.BASE_URL}videos/short-video/fruit-fly-love-poster.png`, description: '把果蝇的生物话题放进节日里的“恋爱现场”，用拟人化的小剧情讲冷知识。让原本有距离感的科学内容变成轻松、好笑又值得转发的话题。' },
 ]
 
 const homepageWorks = [
-  { ...shortFilmVideos[0], description: '以人物与情绪为线索的音乐短片内容制作。' },
-  { ...shortVideoVideos[0], description: '围绕新车上市与 AI 影像完成的车型内容表达。' },
+  { ...shortFilmVideos[0], poster: workShortFilmImage, description: '以人物与情绪为线索的音乐短片内容制作。' },
+  { ...shortVideoVideos[0], title: 'AI × 全系车色', description: '围绕新车上市与 AI 影像完成的车型内容表达。' },
   { ...shortFilmVideos[1], description: '以真实人物与品牌故事为核心的宣传片协作。' },
   { ...shortVideoVideos[1], description: '镜头表现与人物表达结合的主播样片。' },
   { ...shortVideoVideos[2], description: '用奇幻叙事和节奏剪辑构建短视频氛围。' },
   { ...shortVideoVideos[3], description: '围绕节目节点完成的预热与混剪内容。' },
   { ...shortFilmVideos[2], description: '企业品牌叙事与宣传片内容协同。' },
-  { ...shortVideoVideos[4], description: '以动势转场强化节奏与观看记忆点。' },
+  { ...shortVideoVideos[4], poster: workShortVideoImage, description: '以动势转场强化节奏与观看记忆点。' },
   { ...shortVideoVideos[5], description: '轻量化剧情表达与社交内容剪辑。' },
-  { title: '云上星梦', label: 'LIVE GIFT', src: `${import.meta.env.BASE_URL}videos/cloud-dream.mp4`, poster: `${import.meta.env.BASE_URL}videos/cloud-dream-poster.png`, description: '直播礼物视觉创意与动态效果设计。' },
+  { title: '直播礼物', label: 'LIVE GIFT', src: `${import.meta.env.BASE_URL}videos/cloud-dream.mp4`, poster: workLiveGiftImage, description: '直播礼物视觉创意与动态效果设计。' },
 ]
 
 function DepthVideoCarousel({ videos, title, eyebrow, projectNumber, pageClass = '' }) {
@@ -367,6 +367,25 @@ function DepthVideoCarousel({ videos, title, eyebrow, projectNumber, pageClass =
     updatePlayback(index, { currentTime })
   }
 
+  const toggleVideoPlayback = (index) => {
+    const video = videoRefs.current[index]
+    if (!video) return
+    if (video.paused) video.play()
+    else video.pause()
+  }
+
+  useEffect(() => {
+    const handleSpaceToggle = (event) => {
+      if (event.code !== 'Space' || event.repeat) return
+      const target = event.target
+      if (target instanceof HTMLElement && (target.isContentEditable || /^(INPUT|TEXTAREA|SELECT|BUTTON)$/.test(target.tagName))) return
+      event.preventDefault()
+      toggleVideoPlayback(activeIndex)
+    }
+    window.addEventListener('keydown', handleSpaceToggle)
+    return () => window.removeEventListener('keydown', handleSpaceToggle)
+  }, [activeIndex])
+
   const handlePointerDown = (event) => {
     dragStart.current = { x: event.clientX, y: event.clientY }
   }
@@ -391,7 +410,7 @@ function DepthVideoCarousel({ videos, title, eyebrow, projectNumber, pageClass =
   return <main className={`short-film-page ${pageClass}`}>
     <header className="site-header detail-header"><a className="detail-back" href={`${import.meta.env.BASE_URL}#work`} onClick={handlePortfolioBack}><ArrowDownRight size={15} /> 返回作品集</a><span className="detail-index">PROJECT / {projectNumber}</span></header>
     <section className="short-film-depth section-shell" tabIndex="0" aria-label={`${title}三维视频轮播`} onKeyDown={(event) => { if (event.key === 'ArrowLeft') moveTo(activeIndex - 1); if (event.key === 'ArrowRight') moveTo(activeIndex + 1) }} onWheel={handleWheel}>
-      <div className="short-film-depth-heading"><div><p>{eyebrow}</p><h1>{title}</h1></div><span>DRAG · SCROLL · ARROW KEYS</span></div>
+      <div className="short-film-depth-heading"><div><p>{eyebrow}</p></div><span>DRAG · SCROLL · ARROW KEYS</span></div>
       <div className="short-film-depth-stage" onPointerDown={handlePointerDown} onPointerUp={handlePointerUp} onPointerCancel={() => { dragStart.current = null }}>
         {videos.map((film, index) => {
           const offset = getOffset(index)
@@ -402,8 +421,8 @@ function DepthVideoCarousel({ videos, title, eyebrow, projectNumber, pageClass =
           const layerStyle = { '--depth-layer': depth, '--depth-x': `${direction * Math.min(46, 27 + depth * 7)}vw`, '--depth-y': `${20 + depth * 11}px`, '--depth-z': `${-165 - depth * 100}px`, '--depth-rotate': `${direction * -(15 + depth * 3)}deg`, '--depth-scale': Math.max(.58, .86 - depth * .08), '--depth-opacity': Math.max(.08, .5 - depth * .12) }
           return <article className={`short-film-depth-card ${isActive ? 'is-active' : offset < 0 ? 'is-before' : 'is-after'}`} key={film.src} aria-hidden={!isActive} onClick={() => { if (!isActive) moveTo(index) }} style={layerStyle}>
             <div className="short-film-depth-video">
-              <video ref={(node) => { videoRefs.current[index] = node }} src={film.src} poster={film.poster} preload="metadata" playsInline onLoadedMetadata={(event) => updatePlayback(index, { duration: event.currentTarget.duration })} onTimeUpdate={(event) => updatePlayback(index, { currentTime: event.currentTarget.currentTime })} onPlay={() => { setPlayingIndex(index); videoRefs.current.forEach((video, videoIndex) => { if (videoIndex !== index) video?.pause() }) }} onPause={() => setPlayingIndex((playing) => playing === index ? null : playing)} onEnded={() => setPlayingIndex(null)} />
-              {isActive && playingIndex !== index && <button type="button" className="short-film-depth-play" aria-label={`播放${film.title}`} onClick={(event) => { event.stopPropagation(); videoRefs.current[index]?.play() }}><Play size={28} fill="currentColor" /></button>}
+              <video ref={(node) => { videoRefs.current[index] = node }} src={film.src} poster={film.poster} preload="metadata" playsInline onClick={(event) => { if (!isActive) return; event.stopPropagation(); toggleVideoPlayback(index) }} onLoadedMetadata={(event) => updatePlayback(index, { duration: event.currentTarget.duration })} onTimeUpdate={(event) => updatePlayback(index, { currentTime: event.currentTarget.currentTime })} onPlay={() => { setPlayingIndex(index); videoRefs.current.forEach((video, videoIndex) => { if (videoIndex !== index) video?.pause() }) }} onPause={() => setPlayingIndex((playing) => playing === index ? null : playing)} onEnded={() => setPlayingIndex(null)} />
+              {isActive && playingIndex !== index && <button type="button" className="short-film-depth-play" aria-label={`播放${film.title}`} onClick={(event) => { event.stopPropagation(); toggleVideoPlayback(index) }}><Play size={28} fill="currentColor" /></button>}
               {isActive && <div className="short-film-depth-progress" onPointerDown={(event) => event.stopPropagation()} onClick={(event) => event.stopPropagation()}><time>{formatTime(timing.currentTime)}</time><input aria-label={`调整${film.title}播放进度`} type="range" min="0" max={timing.duration || 0} step="0.01" value={Math.min(timing.currentTime, timing.duration || 0)} style={{ '--video-progress': timing.duration ? `${timing.currentTime / timing.duration * 100}%` : '0%' }} onInput={(event) => seekTo(index, event.currentTarget.value)} onChange={(event) => seekTo(index, event.currentTarget.value)} /><time>{formatTime(timing.duration)}</time></div>}
               {!isActive && <span aria-hidden="true" />}
             </div>
@@ -482,13 +501,25 @@ function LiveGiftCinema() {
     event.currentTarget.style.setProperty('--gift-shift-y', '0px')
   }
 
-  return <main className="live-gift-cinema" style={{ '--gift-progress': duration ? `${currentTime / duration * 100}%` : '0%' }} onKeyDown={(event) => { if (event.code === 'Space') { event.preventDefault(); togglePlayback() }; if (event.key.toLowerCase() === 'm') setMuted((value) => !value) }} tabIndex="0">
+  useEffect(() => {
+    const handleSpaceToggle = (event) => {
+      if (event.code !== 'Space' || event.repeat) return
+      const target = event.target
+      if (target instanceof HTMLElement && (target.isContentEditable || /^(INPUT|TEXTAREA|SELECT|BUTTON)$/.test(target.tagName))) return
+      event.preventDefault()
+      togglePlayback()
+    }
+    window.addEventListener('keydown', handleSpaceToggle)
+    return () => window.removeEventListener('keydown', handleSpaceToggle)
+  }, [])
+
+  return <main className="live-gift-cinema" style={{ '--gift-progress': duration ? `${currentTime / duration * 100}%` : '0%' }} tabIndex="0">
     <img className="live-gift-backdrop" src={backdropSource} alt="" aria-hidden="true" />
     <img className="live-gift-backdrop-focus" src={backdropSource} alt="" aria-hidden="true" />
     <div className="live-gift-backdrop-shade" aria-hidden="true" />
     <header className="live-gift-cinema-header"><a href={`${import.meta.env.BASE_URL}#work`} onClick={handlePortfolioBack}><ArrowDownRight size={14} /> 返回作品集</a><span>PROJECT / 01</span></header>
     <section className="live-gift-stage" aria-label="云上星梦直播礼物视频作品">
-      <div className="live-gift-title-rail"><span className="live-gift-rail-label">LIVE GIFT</span><i aria-hidden="true" /><article className="live-gift-info-card"><small>01 / LIVE GIFT</small><h1>云上星梦</h1><div className="live-gift-info-tags"><span>直播赛事</span><span>礼物特效</span><span>梦幻应援</span></div><p>为直播赛事打造的专属礼物特效。以云海、星光与舞台为视觉核心，让一次送礼化为主播与观众共同参与的梦幻应援时刻。</p></article></div>
+      <div className="live-gift-title-rail"><span className="live-gift-rail-label">LIVE GIFT</span><i aria-hidden="true" /><article className="live-gift-info-card"><small>01 / LIVE GIFT</small><div className="live-gift-info-tags"><span>直播赛事</span><span>礼物特效</span><span>梦幻应援</span></div><p>为直播赛事打造的专属礼物特效。以云海、星光与舞台为视觉核心，让一次送礼化为主播与观众共同参与的梦幻应援时刻。</p></article></div>
       <div ref={playerRef} className={`live-gift-player ${playing ? 'is-playing' : ''}`} onPointerMove={handlePointerMove} onPointerLeave={resetPointer}>
         <video ref={videoRef} src={videoSource} poster={posterSource} preload="metadata" playsInline muted={muted} onLoadedMetadata={(event) => setDuration(event.currentTarget.duration)} onTimeUpdate={(event) => setCurrentTime(event.currentTarget.currentTime)} onPlay={handlePlay} onPause={handlePause} onEnded={handlePause} onClick={togglePlayback} />
         <button type="button" className="live-gift-play" aria-label={playing ? '暂停云上星梦' : '播放云上星梦'} onClick={togglePlayback}>{playing ? <Pause size={28} fill="currentColor" /> : <Play size={30} fill="currentColor" />}</button>
@@ -514,7 +545,7 @@ function WorkDetailPage({ project }) {
   if (project.slug === 'live-gift') return <LiveGiftCinema />
   return <main className={`project-detail-page project-detail-${project.tone}`}>
     <header className="site-header detail-header"><a className="detail-back" href={`${import.meta.env.BASE_URL}#work`} onClick={handlePortfolioBack}><ArrowDownRight size={15} /> 返回作品集</a><span className="detail-index">PROJECT / {String(featuredProjects.indexOf(project) + 1).padStart(2, '0')}</span></header>
-    <section className="project-detail-hero section-shell"><div className="project-detail-copy"><p className="eyebrow">{project.english}</p><h1>{project.label}</h1><p className="project-detail-title">{project.title}</p><p className="project-detail-description">{project.description}</p><div className="project-detail-meta">{project.meta}</div></div><div className="project-detail-image"><img src={project.image} alt={project.title} /></div></section>
+    <section className="project-detail-hero section-shell"><div className="project-detail-copy"><p className="eyebrow">{project.english}</p><p className="project-detail-title">{project.title}</p><p className="project-detail-description">{project.description}</p><div className="project-detail-meta">{project.meta}</div></div><div className="project-detail-image"><img src={project.image} alt={project.title} /></div></section>
     <section className="project-detail-body section-shell"><div className="detail-section-label">01 / PROJECT NOTES</div><div className="project-detail-notes"><h2>把内容<br /><i>做成可以被记住的画面。</i></h2><div>{project.details.map((detail) => <p key={detail}>{detail}</p>)}</div></div></section>
   </main>
 }
@@ -718,7 +749,7 @@ function App() {
         <div className="contact-layout">
           <div className="contact-content">
             <p className="eyebrow">LET’S TALK</p>
-            <h2>期待与您共事。</h2>
+            <h2>期待与您共事</h2>
             <p className="contact-description">欢迎交流内容运营、营销策划与创意项目合作。</p>
             <div className="contact-actions">
               <a className="contact-button contact-email-button" href="mailto:1914902866@qq.com">邮箱联系 <ArrowUpRight size={18} /></a>

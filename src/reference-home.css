@@ -4,6 +4,7 @@
 .reference-home::before { content: ''; position: absolute; z-index: -1; inset: 0; background: url('./assets/portfolio-background.jpg') center / cover; opacity: .07; filter: blur(60px); }
 .reference-home::after { content: ''; position: absolute; z-index: -1; inset: 0; pointer-events: none; box-shadow: inset -24vw 0 24vw rgba(0,0,0,.65); }
 .reference-header { position: fixed; top: 22px; left: 50%; transform: translateX(-50%); z-index: 20; width: min(540px, calc(100% - 32px)); }
+.reference-header.is-released { position: absolute; top: var(--nav-release-top); }
 .reference-header .reference-nav { position: static; display: flex; flex-direction: row; align-items: center; justify-content: center; gap: 8px; margin: 0; padding: 5px 14px; border: 1px solid #233637; border-radius: 999px; background: rgba(10,28,30,.88); backdrop-filter: blur(18px); box-shadow: 0 2px 12px #0002; }
 .reference-nav a { padding: 7px 12px; border-radius: 999px; text-align: center; color: #e6ebdf; white-space: nowrap; transition: color .2s, background .2s; }
 .reference-nav a span { display: block; font-size: 11px; font-weight: 700; }

@@ -9,6 +9,7 @@ const navigation = [
 
 export default function ReferenceHome({ works, portrait, imageWork }) {
   const railRef = useRef(null)
+  const headerRef = useRef(null)
   const dialogRef = useRef(null)
   const closeRef = useRef(null)
   const openerRef = useRef(null)
@@ -18,6 +19,7 @@ export default function ReferenceHome({ works, portrait, imageWork }) {
   const [active, setActive] = useState(null)
   const [opening, setOpening] = useState(null)
   const [section, setSection] = useState('home')
+  const [navReleaseTop, setNavReleaseTop] = useState(null)
   const [edges, setEdges] = useState({ start: true, end: false })
   const cardRefs = useRef([])
 
@@ -87,6 +89,27 @@ export default function ReferenceHome({ works, portrait, imageWork }) {
   }, [])
 
   useEffect(() => {
+    const updateNavPosition = () => {
+      const work = document.getElementById('work')
+      const shouldRelease = work && work.getBoundingClientRect().top <= window.innerHeight
+
+      setNavReleaseTop(previous => {
+        if (!shouldRelease) return previous === null ? previous : null
+        if (previous !== null || !headerRef.current) return previous
+        return window.scrollY + headerRef.current.getBoundingClientRect().top
+      })
+    }
+
+    updateNavPosition()
+    window.addEventListener('scroll', updateNavPosition, { passive: true })
+    window.addEventListener('resize', updateNavPosition)
+    return () => {
+      window.removeEventListener('scroll', updateNavPosition)
+      window.removeEventListener('resize', updateNavPosition)
+    }
+  }, [])
+
+  useEffect(() => {
     const rail = railRef.current
     const update = () => setEdges({ start: rail.scrollLeft <= 2, end: rail.scrollLeft >= rail.scrollWidth - rail.clientWidth - 2 })
     const wheel = event => {
@@ -151,7 +174,11 @@ export default function ReferenceHome({ works, portrait, imageWork }) {
   }
 
   return <>
-    <header className="reference-header">
+    <header
+      ref={headerRef}
+      className={`reference-header${navReleaseTop !== null ? ' is-released' : ''}`}
+      style={navReleaseTop !== null ? { '--nav-release-top': `${navReleaseTop}px` } : undefined}
+    >
       <nav className="reference-nav" aria-label="主导航">
         {navigation.map(([id, chinese, english]) => <a key={id} href={`#${id}`} className={section === id ? 'is-current' : ''} aria-current={section === id ? 'location' : undefined}>
           <span>{chinese}</span><small>{english}</small>
