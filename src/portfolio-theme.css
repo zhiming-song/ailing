@@ -25,9 +25,9 @@ body::after { background: transparent; box-shadow: inset -24vw 0 24vw rgba(0,0,0
 :focus-visible { outline: 2px solid var(--portfolio-accent); outline-offset: 5px; }
 #about, #experience, #work { scroll-margin-top: 76px; }
 
-/* Keep the experience-to-work transition compact and proportional. */
-.experience { padding-bottom: 0; overflow: visible; overscroll-behavior-y: auto; }
-.work { padding-top: clamp(18px, 2.2vw, 30px); }
+/* A continuous section rhythm: content begins as the previous section resolves. */
+.experience { padding-top: clamp(14px, 1.8vw, 28px); padding-bottom: 0; overflow: visible; overscroll-behavior-y: auto; }
+.work { padding-top: clamp(14px, 1.6vw, 24px); }
 .experience-timeline { padding-bottom: 0; }
 .work .card-spread-gallery { min-height: 500px; margin-top: 8px; padding-top: 12px; padding-bottom: 8px; }
 .work .card-spread-gallery-deck { height: 420px; }
@@ -66,12 +66,12 @@ body::after { background: transparent; box-shadow: inset -24vw 0 24vw rgba(0,0,0
 /* Homepage palette carried into the About, Experience, Work, and Contact sections. */
 .about-page, .experience, .work, .contact { color: var(--portfolio-text); background: transparent; }
 .experience { position: relative; }
-.experience-sticky-intro { position: sticky; top: 0; z-index: 12; padding: 104px 0 18px; background: #081a1c; box-shadow: 0 12px 18px rgba(8, 26, 28, .98); }
-.experience-sticky-intro.is-released { position: absolute; top: var(--experience-sticky-release-top); left: var(--experience-sticky-release-left); right: var(--experience-sticky-release-right); }
-.experience.is-sticky-released { padding-top: calc(var(--experience-base-padding-top) + var(--experience-sticky-height)); }
+.experience-sticky-intro { position: relative; top: auto; z-index: 1; padding: 14px 0 12px; background: transparent; box-shadow: none; }
+.experience-sticky-intro.is-released { position: relative; top: auto; right: auto; left: auto; }
+.experience.is-sticky-released { padding-top: clamp(14px, 1.8vw, 28px); }
 .experience-sticky-intro .section-label { margin: 0; }
 .experience-sticky-kicker { margin: 16px 0 0; color: var(--portfolio-accent); font: 800 13px 'DM Mono'; letter-spacing: .17em; }
-.experience > .experience-journey-heading { margin-top: 36px; margin-bottom: 0; }
+.experience > .experience-journey-heading { margin-top: 18px; margin-bottom: 0; }
 .experience > .experience-journey-heading h2 { margin-top: 0; }
 .experience-timeline { padding-bottom: 0; }
 .experience-item-4 { margin-bottom: 0; }
@@ -80,7 +80,7 @@ body::after { background: transparent; box-shadow: inset -24vw 0 24vw rgba(0,0,0
 .experience-item.is-visible { opacity: 1; transform: translateY(0); }
 .experience-item.is-visible .experience-node { box-shadow: 0 0 0 8px #0d201dcc, 0 0 32px color-mix(in srgb, var(--portfolio-accent, #dbf52b) 62%, transparent); }
 @media (max-width: 800px) {
-  .experience-sticky-intro { top: 0; padding: 82px 0 16px; }
+  .experience-sticky-intro { top: auto; padding: 12px 0 10px; }
   .experience-sticky-kicker { margin-top: 12px; font-size: 10px; }
   .experience > .experience-journey-heading { margin-top: 24px; }
   .experience-timeline { padding-bottom: 0; }
@@ -93,7 +93,7 @@ body::after { background: transparent; box-shadow: inset -24vw 0 24vw rgba(0,0,0
   text-shadow: none;
 }
 /* Advantages section: loose keyword cards inspired by the supplied reference. */
-.about-page { background: #071317; }
+.about-page { padding-top: clamp(22px, 2.3vw, 38px); padding-bottom: clamp(28px, 3vw, 52px); background: #071317; }
 .about-page .section-label { border-color: #304247; }
 .advantages-heading { margin: 24px 0 54px; }
 .advantages-heading p { margin: 0 0 24px; color: var(--portfolio-accent); font: 800 11px 'DM Mono'; letter-spacing: .2em; }
@@ -166,7 +166,7 @@ body::after { background: transparent; box-shadow: inset -24vw 0 24vw rgba(0,0,0
 .contact-button:hover { background: var(--portfolio-accent); color: var(--portfolio-bg); }
 
 /* Closing contact page: a direct, employment-focused ending to the portfolio journey. */
-.contact-page { position: relative; isolation: isolate; width: 100%; min-height: 100svh; margin: 0; padding: clamp(128px, 10.5vw, 215px) clamp(80px, 8.8vw, 180px) 30px 11.6vw; overflow: hidden; background: radial-gradient(circle at 78% 20%, rgba(118,255,45,.10), transparent 32%), radial-gradient(circle at 8% 88%, rgba(13,104,122,.13), transparent 34%), #071116; }
+.contact-page { position: relative; isolation: isolate; width: 100%; min-height: 0; margin: 0; padding: clamp(48px, 3.6vw, 72px) clamp(80px, 8.8vw, 180px) 30px 11.6vw; overflow: hidden; background: radial-gradient(circle at 78% 20%, rgba(118,255,45,.10), transparent 32%), radial-gradient(circle at 8% 88%, rgba(13,104,122,.13), transparent 34%), #071116; }
 .contact-page .section-label { position: relative; z-index: 1; padding-top: 0; border: 0; color: #a8ff12; font: 600 clamp(15px, 1.03vw, 21px) / 1 'DM Mono'; letter-spacing: .29em; }
 .contact-page .contact-layout { position: relative; z-index: 1; display: grid; grid-template-columns: minmax(0, 1000px) minmax(330px, 380px); align-items: start; column-gap: clamp(72px, 5.85vw, 120px); flex: 1; margin: 24px 0 0; }
 .contact-left-rail { position: relative; z-index: 1; min-width: 0; }
@@ -196,16 +196,19 @@ body::after { background: transparent; box-shadow: inset -24vw 0 24vw rgba(0,0,0
 .contact-ambient::before { width: 72%; aspect-ratio: 1; top: 4%; right: -10%; background: radial-gradient(circle at 34% 36%, rgba(219,245,43,.34), rgba(69,152,124,.16) 38%, transparent 70%); animation: contact-drift 10s ease-in-out infinite alternate; }
 .contact-ambient::after { width: 58%; aspect-ratio: 1; bottom: 2%; left: 3%; background: radial-gradient(circle, rgba(34,125,149,.27), rgba(55,94,73,.1) 48%, transparent 72%); animation: contact-drift 13s ease-in-out infinite alternate-reverse; }
 @keyframes contact-drift { from { transform: translate3d(-4%, -3%, 0) scale(.94); } to { transform: translate3d(7%, 5%, 0) scale(1.07); } }
-@media (prefers-reduced-motion: reduce) { .contact-ambient::before, .contact-ambient::after { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .contact-ambient::before, .contact-ambient::after, .contact-tags button, .contact-direct-line a { animation: none; } }
 .contact-tags { display: grid; grid-template-columns: repeat(3, max-content); gap: 13px; margin-top: clamp(66px, 4.4vw, 90px); }
-.contact-tags span { min-height: 52px; display: inline-flex; align-items: center; padding: 11px 22px; border: 1px solid rgba(255,255,255,.18); border-radius: 26px; color: rgba(255,255,255,.62); font: 300 clamp(15px, 1.02vw, 21px) / 1 'PingFang SC', 'Noto Sans SC', sans-serif; }
-.contact-tags span::after { margin-left: 26px; color: rgba(255,255,255,.5); content: '×'; }
-.contact-tags .contact-tag-add { min-width: 182px; font-size: clamp(17px, 1.1vw, 23px); }
-.contact-tags .contact-tag-add::after { content: none; }
-.contact-direct-line { display: flex; align-items: center; gap: 30px; margin-top: clamp(50px, 3vw, 62px); color: rgba(255,255,255,.72); font: 300 clamp(17px, 1.25vw, 26px) / 1 'PingFang SC', 'Noto Sans SC', sans-serif; letter-spacing: 0; }
+.contact-tags button { min-height: 52px; display: inline-flex; align-items: center; justify-content: center; padding: 11px 22px; border: 1px solid rgba(255,255,255,.18); border-radius: 26px; color: rgba(255,255,255,.62); background: rgba(8,26,28,.22); box-shadow: 0 8px 18px rgba(0,0,0,.12); font: 300 clamp(15px, 1.02vw, 21px) / 1 'PingFang SC', 'Noto Sans SC', sans-serif; cursor: pointer; animation: contact-tag-float 4.4s ease-in-out infinite alternate; transition: transform .22s ease, color .22s ease, border-color .22s ease, background .22s ease, box-shadow .22s ease; }
+.contact-tags button:nth-child(2n) { animation-delay: -.9s; }
+.contact-tags button:nth-child(3n) { animation-delay: -2s; }
+.contact-tags button:hover, .contact-tags button:focus-visible { border-color: var(--portfolio-accent); color: #1e2b1c; background: var(--portfolio-accent); box-shadow: 0 14px 28px rgba(219,245,43,.22); transform: translateY(-8px) scale(1.03); outline: none; }
+.contact-tags button.is-selected { border-color: #edff9a; color: #152015; background: #d5ee43; box-shadow: 0 0 0 4px rgba(219,245,43,.14), 0 13px 24px rgba(0,0,0,.18); transform: translateY(-5px); }
+@keyframes contact-tag-float { from { translate: 0 0; } to { translate: 0 -5px; } }
+.contact-direct-line { display: flex; align-items: center; margin-top: clamp(50px, 3vw, 62px); color: rgba(255,255,255,.72); font: 300 clamp(17px, 1.25vw, 26px) / 1 'PingFang SC', 'Noto Sans SC', sans-serif; letter-spacing: 0; }
 .contact-direct-line > span { color: var(--portfolio-muted); }
-.contact-direct-line a { display: inline-flex; align-items: center; gap: 10px; color: rgba(255,255,255,.72); font-size: inherit; letter-spacing: 0; transition: color .2s ease; }
-.contact-direct-line a:hover { color: var(--portfolio-accent); }
+.contact-direct-line a { min-height: 52px; display: inline-flex; align-items: center; gap: 10px; padding: 11px 22px; border: 1px solid rgba(255,255,255,.18); border-radius: 26px; color: rgba(255,255,255,.72); background: rgba(8,26,28,.22); box-shadow: 0 8px 18px rgba(0,0,0,.12); font-size: inherit; letter-spacing: 0; animation: contact-tag-float 4.4s ease-in-out -.45s infinite alternate; transition: transform .22s ease, color .22s ease, border-color .22s ease, background .22s ease, box-shadow .22s ease; }
+.contact-mail-icon { display: inline-flex; align-items: center; font-size: .9em; line-height: 1; }
+.contact-direct-line a:hover, .contact-direct-line a:focus-visible { border-color: var(--portfolio-accent); color: #1e2b1c; background: var(--portfolio-accent); box-shadow: 0 14px 28px rgba(219,245,43,.22); outline: none; transform: translateY(-8px) scale(1.03); }
 .contact-card { position: relative; justify-self: end; width: min(100%, 390px); min-height: 360px; display: flex; flex-direction: column; justify-content: space-between; padding: 32px; border: 1px solid #536867; border-radius: 30px; color: #eaf1e8; background: linear-gradient(145deg, rgba(38, 51, 37, .76), rgba(16, 25, 28, .9)); box-shadow: 0 24px 52px rgba(0, 0, 0, .25), inset 0 1px 0 rgba(255,255,255,.08); }
 .contact-card small { color: var(--portfolio-accent); font: 800 10px 'DM Mono'; letter-spacing: .16em; }
 .contact-card b { font: 700 clamp(30px, 3vw, 48px) / 1.05 var(--portfolio-font); letter-spacing: -.07em; }
@@ -334,3 +337,92 @@ body::after { background: transparent; box-shadow: inset -24vw 0 24vw rgba(0,0,0
 }
 
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+
+/* Final page-to-page continuity: no spacer bands between homepage sections. */
+main { background: var(--portfolio-bg); }
+main > .reference-home,
+main > .experience,
+main > .work,
+main > .about-page,
+main > .contact-page {
+  margin-top: 0;
+  margin-bottom: 0;
+  border-top: 0;
+  border-bottom: 0;
+}
+.reference-home { background-color: var(--portfolio-bg); }
+.reference-gallery { padding-bottom: 0; }
+.reference-gallery-tools { padding-bottom: 0; }
+.experience { padding-top: 0; background: var(--portfolio-bg); }
+.experience.is-sticky-released { padding-top: 0; }
+.experience-sticky-intro { padding-top: 18px; }
+.work { padding-top: 10px; padding-bottom: 18px; background: var(--portfolio-bg); }
+.about-page { padding-top: 18px; padding-bottom: 24px; background: var(--portfolio-bg); }
+.contact-page {
+  padding-top: 24px;
+  background:
+    radial-gradient(circle at 78% 20%, rgba(118,255,45,.10), transparent 32%),
+    radial-gradient(circle at 8% 88%, rgba(13,104,122,.13), transparent 34%),
+    var(--portfolio-bg);
+}
+@media (max-width: 1100px) {
+  .contact-page { padding-top: 28px; }
+}
+@media (max-width: 800px) {
+  .experience { padding-top: 0; }
+  .experience-sticky-intro { padding-top: 14px; }
+  .work { padding-top: 10px; padding-bottom: 16px; }
+  .about-page { padding-top: 16px; padding-bottom: 20px; }
+  .contact-page { padding-top: 24px; }
+}
+
+/* The contact page is a self-contained final screen. */
+.contact-page {
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  padding-top: clamp(92px, 13svh, 170px);
+  background:
+    radial-gradient(circle at 78% 20%, rgba(118,255,45,.10), transparent 32%),
+    radial-gradient(circle at 8% 88%, rgba(13,104,122,.13), transparent 34%),
+    #071116;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+}
+@media (max-width: 1100px) {
+  .contact-page { min-height: 100svh; padding-top: clamp(74px, 11svh, 120px); }
+}
+@media (max-width: 800px) {
+  .contact-page { min-height: 100svh; padding-top: clamp(64px, 10svh, 96px); }
+}
+
+/* Keep the selected-work section as a complete, standalone screen. */
+.work {
+  min-height: 100svh;
+  isolation: isolate;
+  padding-top: clamp(26px, 4svh, 58px);
+  padding-bottom: clamp(22px, 3svh, 42px);
+  background: #081a1c;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+}
+@media (max-width: 800px) {
+  .work { min-height: 100svh; padding-top: 22px; padding-bottom: 22px; }
+}
+
+/* Match the final-page labels to the typography used by earlier sections. */
+.contact-page .section-label {
+  color: var(--portfolio-accent);
+  font: 600 11px/1 'DM Mono';
+  letter-spacing: .16em;
+}
+.contact-page .eyebrow {
+  margin-bottom: 24px;
+  color: var(--portfolio-accent);
+  font: 800 11px/1 'DM Mono';
+  letter-spacing: .2em;
+}
+@media (max-width: 800px) {
+  .contact-page .section-label,
+  .contact-page .eyebrow { font-size: 10px; }
+}

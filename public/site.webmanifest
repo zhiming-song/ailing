@@ -1,0 +1,11 @@
+{
+  "name": "刘爱玲个人作品集",
+  "short_name": "刘爱玲作品集",
+  "icons": [
+    { "src": "favicon-camera-32.png", "sizes": "32x32", "type": "image/png" },
+    { "src": "favicon-camera-180.png", "sizes": "180x180", "type": "image/png" }
+  ],
+  "theme_color": "#ffffff",
+  "background_color": "#ffffff",
+  "display": "standalone"
+}

@@ -660,6 +660,7 @@ function App() {
   const [activeTab, setActiveTab] = useState('长视频')
   const [heroOffset, setHeroOffset] = useState({ x: 0, y: 0 })
   const [activeSkill, setActiveSkill] = useState('')
+  const [selectedContactTags, setSelectedContactTags] = useState([])
   const [currentPath, setCurrentPath] = useState(() => window.location.pathname)
 
   useEffect(() => {
@@ -814,9 +815,12 @@ useEffect(() => {
               <p className="eyebrow">LET’S TALK</p>
               <h2>下一段经历，也许可以<br />一起创造。</h2>
               <div className="contact-tags" aria-label="擅长方向">
-                <span>内容运营</span><span>品牌传播</span><span>整合营销</span><span>社媒运营</span><span>KOL 共创</span><span>AI 内容创作</span>
+                {['内容运营', '品牌传播', '整合营销', '社媒运营', 'KOL 共创', 'AI 内容创作'].map((tag) => {
+                  const isSelected = selectedContactTags.includes(tag)
+                  return <button key={tag} type="button" className={isSelected ? 'is-selected' : ''} aria-pressed={isSelected} onClick={() => setSelectedContactTags((current) => current.includes(tag) ? current.filter((item) => item !== tag) : [...current, tag])}>{tag}</button>
+                })}
               </div>
-              <div className="contact-direct-line"><span>Email</span><a href="mailto:1914902866@qq.com">1914902866@qq.com</a></div>
+              <div className="contact-direct-line"><a href="mailto:1914902866@qq.com"><span className="contact-mail-icon" aria-hidden="true">📮</span>1914902866@qq.com</a></div>
             </div>
           </div>
           <aside className="contact-connect-card" aria-label="微信联系二维码">
