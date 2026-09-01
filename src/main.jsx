@@ -1,4 +1,4 @@
-import { StrictMode, useEffect, useRef, useState } from 'react'
+import { StrictMode, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { createRoot } from 'react-dom/client'
 import ReferenceHome from './ReferenceHome'
 import { ArrowDownRight, ArrowUpRight, ChevronLeft, ChevronRight, Maximize2, Pause, Play, Volume2, VolumeX } from 'lucide-react'
@@ -29,6 +29,7 @@ import duocaiLogo from './assets/logo-duocai.png'
 import momoLogo from './assets/logo-momo.png'
 import yuanliLogo from './assets/logo-yuanli.png'
 import nioLogo from './assets/logo-nio.png'
+import wechatQr from './assets/wechat-qr.jpg'
 import './styles.css'
 import './portfolio-theme.css'
 
@@ -108,15 +109,8 @@ const catalogProjects = [
 
 function handlePortfolioBack(event) {
   event.preventDefault()
-  const fallback = `${import.meta.env.BASE_URL}#work`
-  let sameOriginReferrer = false
-  try {
-    sameOriginReferrer = Boolean(document.referrer) && new URL(document.referrer).origin === window.location.origin
-  } catch {
-    sameOriginReferrer = false
-  }
-  if (sameOriginReferrer && window.history.length > 1) window.history.back()
-  else window.location.assign(fallback)
+  window.history.replaceState(null, '', `${import.meta.env.BASE_URL}#work`)
+  window.dispatchEvent(new PopStateEvent('popstate'))
 }
 
 const imageWorksImages = [
@@ -294,6 +288,10 @@ function ImageWorksCarousel() {
           </button>
         })}
       </div>
+      <div className="image-works-controls" aria-label="图片切换按钮">
+        <button type="button" aria-label="上一张图片" onPointerDown={(event) => event.stopPropagation()} onClick={() => moveTo(activeIndex - 1)}><ChevronLeft size={24} /></button>
+        <button type="button" aria-label="下一张图片" onPointerDown={(event) => event.stopPropagation()} onClick={() => moveTo(activeIndex + 1)}><ChevronRight size={24} /></button>
+      </div>
     </section>
   </main>
 }
@@ -301,7 +299,7 @@ function ImageWorksCarousel() {
 const shortFilmVideos = [
   { title: '音乐短片', label: 'SHORT FILM', src: `${import.meta.env.BASE_URL}videos/shede.m4v`, poster: `${import.meta.env.BASE_URL}videos/shede-poster.png`, description: '以陌陌官方歌曲《舍得》为情绪线索，拍摄一段关于“舍”与“得”的音乐短片。故事在靠近与放下之间展开，让歌曲里的情感纠葛落到更具体的人物关系中。' },
   { title: '招生宣传片', label: 'PROMOTIONAL FILM', src: `${import.meta.env.BASE_URL}videos/dreamers.m4v`, poster: `${import.meta.env.BASE_URL}videos/dreamers-poster.png`, description: '根据真实校友经历改编，从一个人的成长选择切入，讲述贵州经贸职院学子一路向前的过程。影片以小见大，让招生宣传不止介绍校园，也呈现学校的人文温度与成长陪伴。' },
-  { title: '企业宣传片', label: 'CORPORATE FILM', src: `${import.meta.env.BASE_URL}videos/corporate.m4v`, poster: `${import.meta.env.BASE_URL}videos/corporate-poster.png`, description: '从业务场景、服务内容与团队协作出发，梳理公司的核心能力。用清晰、有节奏的画面，让观众快速理解企业正在做什么，以及能为客户带来什么。' },
+  //{ title: '企业宣传片', label: 'CORPORATE FILM', src: `${import.meta.env.BASE_URL}videos/corporate.m4v`, poster: `${import.meta.env.BASE_URL}videos/corporate-poster.png`, description: '从业务场景、服务内容与团队协作出发，梳理公司的核心能力。用清晰、有节奏的画面，让观众快速理解企业正在做什么，以及能为客户带来什么。' },
 ]
 
 const shortVideoVideos = [
@@ -409,8 +407,7 @@ function DepthVideoCarousel({ videos, title, eyebrow, projectNumber, pageClass =
 
   return <main className={`short-film-page ${pageClass}`}>
     <header className="site-header detail-header"><a className="detail-back" href={`${import.meta.env.BASE_URL}#work`} onClick={handlePortfolioBack}><ArrowDownRight size={15} /> 返回作品集</a><span className="detail-index">PROJECT / {projectNumber}</span></header>
-    <section className="short-film-depth section-shell" tabIndex="0" aria-label={`${title}三维视频轮播`} onKeyDown={(event) => { if (event.key === 'ArrowLeft') moveTo(activeIndex - 1); if (event.key === 'ArrowRight') moveTo(activeIndex + 1) }} onWheel={handleWheel}>
-      <div className="short-film-depth-heading"><div><p>{eyebrow}</p></div><span>DRAG · SCROLL · ARROW KEYS</span></div>
+<section className={`short-film-depth section-shell ${videos.length === 2 ? 'short-film-depth-two-cards' : ''}`} tabIndex="0" aria-label={`${title}三维视频轮播`} onKeyDown={(event) => { if (event.key === 'ArrowLeft') moveTo(activeIndex - 1); if (event.key === 'ArrowRight') moveTo(activeIndex + 1) }} onWheel={handleWheel}>      <div className="short-film-depth-heading"><div><p>{eyebrow}</p></div><span>DRAG · SCROLL · ARROW KEYS</span></div>
       <div className="short-film-depth-stage" onPointerDown={handlePointerDown} onPointerUp={handlePointerUp} onPointerCancel={() => { dragStart.current = null }}>
         {videos.map((film, index) => {
           const offset = getOffset(index)
@@ -519,7 +516,7 @@ function LiveGiftCinema() {
     <div className="live-gift-backdrop-shade" aria-hidden="true" />
     <header className="live-gift-cinema-header"><a href={`${import.meta.env.BASE_URL}#work`} onClick={handlePortfolioBack}><ArrowDownRight size={14} /> 返回作品集</a><span>PROJECT / 01</span></header>
     <section className="live-gift-stage" aria-label="云上星梦直播礼物视频作品">
-      <div className="live-gift-title-rail"><span className="live-gift-rail-label">LIVE GIFT</span><i aria-hidden="true" /><article className="live-gift-info-card"><small>01 / LIVE GIFT</small><div className="live-gift-info-tags"><span>直播赛事</span><span>礼物特效</span><span>梦幻应援</span></div><p>为直播赛事打造的专属礼物特效。以云海、星光与舞台为视觉核心，让一次送礼化为主播与观众共同参与的梦幻应援时刻。</p></article></div>
+      <div className="live-gift-title-rail"><span className="live-gift-rail-label">LIVE GIFT</span><i aria-hidden="true" /><article className="live-gift-info-card"><small>01 / LIVE GIFT</small><h1>云上星梦</h1><div className="live-gift-info-tags"><span>直播赛事</span><span>礼物特效</span><span>梦幻应援</span></div><p>为直播赛事打造的专属礼物特效。以云海、星光与舞台为视觉核心，让一次送礼化为主播与观众共同参与的梦幻应援时刻。</p></article></div>
       <div ref={playerRef} className={`live-gift-player ${playing ? 'is-playing' : ''}`} onPointerMove={handlePointerMove} onPointerLeave={resetPointer}>
         <video ref={videoRef} src={videoSource} poster={posterSource} preload="metadata" playsInline muted={muted} onLoadedMetadata={(event) => setDuration(event.currentTarget.duration)} onTimeUpdate={(event) => setCurrentTime(event.currentTarget.currentTime)} onPlay={handlePlay} onPause={handlePause} onEnded={handlePause} onClick={togglePlayback} />
         <button type="button" className="live-gift-play" aria-label={playing ? '暂停云上星梦' : '播放云上星梦'} onClick={togglePlayback}>{playing ? <Pause size={28} fill="currentColor" /> : <Play size={30} fill="currentColor" />}</button>
@@ -663,14 +660,25 @@ function App() {
   const [activeTab, setActiveTab] = useState('长视频')
   const [heroOffset, setHeroOffset] = useState({ x: 0, y: 0 })
   const [activeSkill, setActiveSkill] = useState('')
+  const [currentPath, setCurrentPath] = useState(() => window.location.pathname)
 
   useEffect(() => {
-    if (window.location.hash !== '#work') return undefined
-    const frame = window.requestAnimationFrame(() => {
-      document.getElementById('work')?.scrollIntoView({ block: 'start' })
-    })
-    return () => window.cancelAnimationFrame(frame)
+    const handleRouteChange = () => setCurrentPath(window.location.pathname)
+    window.addEventListener('popstate', handleRouteChange)
+    return () => window.removeEventListener('popstate', handleRouteChange)
   }, [])
+
+  useLayoutEffect(() => {
+    if (window.location.hash !== '#work') return undefined
+    const workSection = document.getElementById('work')
+    if (!workSection) return undefined
+    const root = document.documentElement
+    const previousScrollBehavior = root.style.scrollBehavior
+    root.style.scrollBehavior = 'auto'
+    window.scrollTo(0, workSection.offsetTop)
+    root.style.scrollBehavior = previousScrollBehavior
+    return undefined
+  }, [currentPath])
 
   useEffect(() => {
     const items = [...document.querySelectorAll('.experience-item')]
@@ -681,12 +689,62 @@ function App() {
     items.forEach((item) => observer.observe(item))
     return () => observer.disconnect()
   }, [])
+useEffect(() => {
+    const stickyIntro = document.querySelector('.experience-sticky-intro')
+    const finalNode = document.querySelector('.experience-item-4 .experience-node')
+    const experience = stickyIntro?.closest('.experience')
+    if (!stickyIntro || !finalNode || !experience) return undefined
 
-  const scrollTo = (id) => {
+    let released = false
+
+    // 最后一个节点进入屏幕时释放固定，并保留标题原来的占位高度。
+    const updateStickyRelease = () => {
+      const shouldRelease = finalNode.getBoundingClientRect().top <= window.innerHeight
+      if (shouldRelease === released) return
+
+      released = shouldRelease
+      if (shouldRelease) {
+        const experienceRect = experience.getBoundingClientRect()
+        const introRect = stickyIntro.getBoundingClientRect()
+        const basePaddingTop = getComputedStyle(experience).paddingTop
+        experience.style.setProperty('--experience-base-padding-top', basePaddingTop)
+        experience.style.setProperty('--experience-sticky-height', `${stickyIntro.offsetHeight}px`)
+        stickyIntro.style.setProperty('--experience-sticky-release-top', `${introRect.top - experienceRect.top}px`)
+        stickyIntro.style.setProperty('--experience-sticky-release-left', `${introRect.left - experienceRect.left}px`)
+        stickyIntro.style.setProperty('--experience-sticky-release-right', `${experienceRect.right - introRect.right}px`)
+        experience.classList.add('is-sticky-released')
+        stickyIntro.classList.add('is-released')
+      } else {
+        stickyIntro.classList.remove('is-released')
+        stickyIntro.style.removeProperty('--experience-sticky-release-top')
+        stickyIntro.style.removeProperty('--experience-sticky-release-left')
+        stickyIntro.style.removeProperty('--experience-sticky-release-right')
+        experience.classList.remove('is-sticky-released')
+      }
+    }
+
+    const syncStickyRelease = () => updateStickyRelease()
+
+    syncStickyRelease()
+    window.addEventListener('scroll', updateStickyRelease, { passive: true })
+    window.addEventListener('resize', syncStickyRelease)
+    return () => {
+      window.removeEventListener('scroll', updateStickyRelease)
+      window.removeEventListener('resize', syncStickyRelease)
+      stickyIntro.classList.remove('is-released')
+      stickyIntro.style.removeProperty('--experience-sticky-release-top')
+      stickyIntro.style.removeProperty('--experience-sticky-release-left')
+      stickyIntro.style.removeProperty('--experience-sticky-release-right')
+      experience.classList.remove('is-sticky-released')
+      experience.style.removeProperty('--experience-base-padding-top')
+      experience.style.removeProperty('--experience-sticky-height')
+    }
+  }, []) 
+ const scrollTo = (id) => {
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' })
   }
 
-  const detailSlug = window.location.pathname.split('/').filter(Boolean).pop()
+  const detailSlug = currentPath.split('/').filter(Boolean).pop()
   const detailProject = featuredProjects.find((project) => project.slug === detailSlug)
   if (detailProject) return <WorkDetailPage project={detailProject} />
 
@@ -720,6 +778,11 @@ function App() {
 
       <section id="work" className="work section-shell">
         <div className="section-label">02 / SELECTED WORK</div>
+        <div className="work-page-heading">
+          <p>THE CREATIVE ARCHIVE / 个人作品</p>
+          <h2>Personal <i>Works</i></h2>
+          <span>用作品记录每一次创意与表达。</span>
+        </div>
         <CardSpreadGallery projects={catalogProjects} />
       </section>
 
@@ -727,14 +790,13 @@ function App() {
         <div className="section-label">03 / ADVANTAGES</div>
         <div className="advantages-heading">
           <p>STRENGTHS / 个人优势</p>
-          <h2>Advantages/<i>个人优势</i></h2>
+          <h2>Advantages</h2>
           <span>用数据与创意，让内容被看见、被记住。</span>
         </div>
         <div className="advantages-grid">
           {advantages.map((item, index) => (
             <div className={`advantage-card advantage-card-${index + 1}`} key={item.tag} onMouseMove={(event) => { const rect = event.currentTarget.getBoundingClientRect(); const x = ((event.clientX - rect.left) / rect.width - .5) * 6; const y = ((event.clientY - rect.top) / rect.height - .5) * 4; event.currentTarget.style.setProperty('--card-x', `${x}px`); event.currentTarget.style.setProperty('--card-y', `${y}px`) }} onMouseLeave={(event) => { event.currentTarget.style.setProperty('--card-x', '0px'); event.currentTarget.style.setProperty('--card-y', '0px') }}>
               <span className="advantage-card-index">0{index + 1} / CORE</span>
-              <span className="advantage-card-close" aria-hidden="true">×</span>
               <span className="advantage-icon" aria-hidden="true">{item.icon}</span>
               <h3>{item.tag}</h3>
               <ul>{item.points.map((point) => <li key={point}>{point}</li>)}</ul>
@@ -747,15 +809,21 @@ function App() {
         <div className="contact-bg-word" aria-hidden="true">LET’S BUILD</div>
         <div className="section-label">05 / CONTACT</div>
         <div className="contact-layout">
-          <div className="contact-content">
-            <p className="eyebrow">LET’S TALK</p>
-            <h2>期待与您共事</h2>
-            <p className="contact-description">欢迎交流内容运营、营销策划与创意项目合作。</p>
-            <div className="contact-actions">
-              <a className="contact-button contact-email-button" href="mailto:1914902866@qq.com">邮箱联系 <ArrowUpRight size={18} /></a>
-              <a className="contact-email-address" href="mailto:1914902866@qq.com">1914902866@qq.com</a>
+          <div className="contact-left-rail">
+            <div className="contact-content">
+              <p className="eyebrow">LET’S TALK</p>
+              <h2>下一段经历，也许可以<br />一起创造。</h2>
+              <div className="contact-tags" aria-label="擅长方向">
+                <span>内容运营</span><span>品牌传播</span><span>整合营销</span><span>社媒运营</span><span>KOL 共创</span><span>AI 内容创作</span>
+              </div>
+              <div className="contact-direct-line"><span>Email</span><a href="mailto:1914902866@qq.com">1914902866@qq.com</a></div>
             </div>
           </div>
+          <aside className="contact-connect-card" aria-label="微信联系二维码">
+            <div className="contact-qr-frame"><img src={wechatQr} alt="微信二维码，扫码添加我为好友" /></div>
+            <div className="contact-connect-copy"><strong>扫码联系我</strong></div>
+          </aside>
+          <div className="contact-ambient" aria-hidden="true" />
         </div>
         <div className="contact-footer"><span>LIU AILING / CONTENT OPERATOR</span><span>OPEN TO WORK</span><span>© 2026</span></div>
       </section>

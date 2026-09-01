@@ -9,42 +9,65 @@ const navigation = [
 
 export default function ReferenceHome({ works, portrait, imageWork }) {
   const railRef = useRef(null)
-  const headerRef = useRef(null)
+  const portraitRef = useRef(null)
   const dialogRef = useRef(null)
   const closeRef = useRef(null)
   const openerRef = useRef(null)
   const drag = useRef(null)
-  const openTimer = useRef(null)
   const explored = useRef(false)
   const [active, setActive] = useState(null)
-  const [opening, setOpening] = useState(null)
   const [section, setSection] = useState('home')
-  const [navReleaseTop, setNavReleaseTop] = useState(null)
   const [edges, setEdges] = useState({ start: true, end: false })
   const cardRefs = useRef([])
 
-  const handleCardTilt = (e, index) => {
-    const card = cardRefs.current[index]
+  const resetDock = () => cardRefs.current.forEach(card => {
     if (!card) return
-    const rect = card.getBoundingClientRect()
-    const x = (e.clientX - rect.left) / rect.width - 0.5
-    const y = (e.clientY - rect.top) / rect.height - 0.5
-    card.style.setProperty('--tilt-x', `${x * 14}deg`)
-    card.style.setProperty('--tilt-y', `${-y * 14}deg`)
-    card.style.setProperty('--glow-x', `${(x + 0.5) * 100}%`)
-    card.style.setProperty('--glow-y', `${(y + 0.5) * 100}%`)
+    card.style.removeProperty('--dock-scale')
+    card.style.removeProperty('--dock-lift')
+    card.style.removeProperty('--dock-rotation')
+  })
+  const handleDockMove = event => {
+    if (event.pointerType && event.pointerType !== 'mouse') return
+    if (drag.current?.moved) { resetDock(); return }
+    cardRefs.current.forEach(card => {
+      if (!card) return
+      const rect = card.getBoundingClientRect()
+      const distance = Math.abs(event.clientX - (rect.left + rect.width / 2))
+      const influence = Math.max(0, 1 - distance / 340)
+      const eased = influence * influence
+      card.style.setProperty('--dock-scale', `${1 + eased * .18}`)
+      card.style.setProperty('--dock-lift', `${-16 * Math.pow(influence, 1.35)}px`)
+      card.style.setProperty('--dock-rotation', '0deg')
+    })
   }
-  const handleCardTiltReset = (index) => {
-    const card = cardRefs.current[index]
-    if (!card) return
-    card.style.setProperty('--tilt-x', '0deg')
-    card.style.setProperty('--tilt-y', '0deg')
+  const handlePortraitMove = event => {
+    if (event.pointerType && event.pointerType !== 'mouse') return
+    const portrait = portraitRef.current
+    if (!portrait) return
+    const rect = portrait.getBoundingClientRect()
+    const x = (event.clientX - rect.left) / rect.width - 0.5
+    const y = (event.clientY - rect.top) / rect.height - 0.5
+    portrait.style.setProperty('--portrait-x', `${x * 10}px`)
+    portrait.style.setProperty('--portrait-y', `${y * 10}px`)
+    portrait.style.setProperty('--portrait-tilt', `${x * 4}deg`)
+    portrait.style.setProperty('--portrait-status-x', `${x * -5}px`)
+    portrait.style.setProperty('--portrait-status-y', `${y * -4}px`)
+  }
+  const handlePortraitReset = () => {
+    const portrait = portraitRef.current
+    if (!portrait) return
+    portrait.style.setProperty('--portrait-x', '0px')
+    portrait.style.setProperty('--portrait-y', '0px')
+    portrait.style.setProperty('--portrait-tilt', '0deg')
+    portrait.style.setProperty('--portrait-status-x', '0px')
+    portrait.style.setProperty('--portrait-status-y', '0px')
   }
   // Nine representative cards form a balanced, full-width home gallery.
   const cards = [
     works[9],
+    works[3],
     { title: 'AI × 城市地标', label: 'IMAGE WORKS', poster: imageWork, href: `${import.meta.env.BASE_URL}works/image-works/` },
-    works[3], ...works.slice(0, 3), ...works.slice(4, 6), works[7],
+    ...works.slice(0, 3), works[7], ...works.slice(5, 6), works[4],
   ]
 
   useLayoutEffect(() => {
@@ -59,21 +82,15 @@ export default function ReferenceHome({ works, portrait, imageWork }) {
     const resize = new ResizeObserver(center)
     resize.observe(rail)
     center()
-    return () => { resize.disconnect(); window.clearTimeout(openTimer.current) }
+    return () => resize.disconnect()
   }, [])
 
   const openWork = (event, work) => {
     if (work.href && (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey)) return
     event.preventDefault()
-    if (openTimer.current) return
     openerRef.current = event.currentTarget
-    setOpening(work.title)
-    openTimer.current = window.setTimeout(() => {
-      openTimer.current = null
-      setOpening(null)
-      if (work.href) window.location.assign(work.href)
-      else setActive(work)
-    }, window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 360)
+    if (work.href) window.location.assign(work.href)
+    else setActive(work)
   }
 
   useEffect(() => {
@@ -87,28 +104,6 @@ export default function ReferenceHome({ works, portrait, imageWork }) {
     window.addEventListener('scroll', update, { passive: true })
     return () => window.removeEventListener('scroll', update)
   }, [])
-
-  useEffect(() => {
-    const updateNavPosition = () => {
-      const work = document.getElementById('work')
-      const shouldRelease = work && work.getBoundingClientRect().top <= window.innerHeight
-
-      setNavReleaseTop(previous => {
-        if (!shouldRelease) return previous === null ? previous : null
-        if (previous !== null || !headerRef.current) return previous
-        return window.scrollY + headerRef.current.getBoundingClientRect().top
-      })
-    }
-
-    updateNavPosition()
-    window.addEventListener('scroll', updateNavPosition, { passive: true })
-    window.addEventListener('resize', updateNavPosition)
-    return () => {
-      window.removeEventListener('scroll', updateNavPosition)
-      window.removeEventListener('resize', updateNavPosition)
-    }
-  }, [])
-
   useEffect(() => {
     const rail = railRef.current
     const update = () => setEdges({ start: rail.scrollLeft <= 2, end: rail.scrollLeft >= rail.scrollWidth - rail.clientWidth - 2 })
@@ -174,11 +169,7 @@ export default function ReferenceHome({ works, portrait, imageWork }) {
   }
 
   return <>
-    <header
-      ref={headerRef}
-      className={`reference-header${navReleaseTop !== null ? ' is-released' : ''}`}
-      style={navReleaseTop !== null ? { '--nav-release-top': `${navReleaseTop}px` } : undefined}
-    >
+    <header className="reference-header">
       <nav className="reference-nav" aria-label="主导航">
         {navigation.map(([id, chinese, english]) => <a key={id} href={`#${id}`} className={section === id ? 'is-current' : ''} aria-current={section === id ? 'location' : undefined}>
           <span>{chinese}</span><small>{english}</small>
@@ -202,17 +193,17 @@ export default function ReferenceHome({ works, portrait, imageWork }) {
             <span>重庆大学 · 艺术学硕士<br />内容策划 / 影像叙事</span>
           </div>
         </div>
-        <div className="reference-portrait">
+        <div ref={portraitRef} className="reference-portrait" onPointerMove={handlePortraitMove} onPointerLeave={handlePortraitReset}>
           <img src={portrait} alt="刘爱玲个人照片" fetchPriority="high" />
           <div className="reference-status"><b>NOW</b><span>内容运营 / 营销策划</span></div>
         </div>
       </div>
       <section id="home-works" className="reference-gallery" aria-label="首页精选作品">
-        <div ref={railRef} className="reference-rail" tabIndex={0} aria-label="左右滑动浏览作品，也可使用上下滚轮" onPointerDown={pointerDown} onPointerMove={pointerMove} onPointerUp={pointerEnd} onPointerCancel={pointerEnd} onPointerLeave={event => { if (!event.buttons) drag.current = null }} onClickCapture={event => { if (drag.current?.moved) { event.preventDefault(); event.stopPropagation(); drag.current = null } }} onKeyDown={event => { if (event.target === event.currentTarget && ['ArrowLeft', 'ArrowRight'].includes(event.key)) { event.preventDefault(); move(event.key === 'ArrowRight' ? 1 : -1) } }}>
+        <div ref={railRef} className="reference-rail" tabIndex={0} aria-label="左右滑动浏览作品，也可使用上下滚轮" onPointerDown={pointerDown} onPointerMove={event => { pointerMove(event); handleDockMove(event) }} onPointerUp={pointerEnd} onPointerCancel={pointerEnd} onPointerLeave={event => { if (!event.buttons) drag.current = null; resetDock() }} onClickCapture={event => { if (drag.current?.moved) { event.preventDefault(); event.stopPropagation(); drag.current = null } }} onKeyDown={event => { if (event.target === event.currentTarget && ['ArrowLeft', 'ArrowRight'].includes(event.key)) { event.preventDefault(); move(event.key === 'ArrowRight' ? 1 : -1) } }}>
           <div className="reference-track">
             {cards.map((work, index) => {
               const content = <><img src={work.poster} alt={`${work.title}封面`} draggable={false} loading={index < 8 ? 'eager' : 'lazy'} /><span className="reference-card-glow" aria-hidden="true" /><span className="reference-card-caption"><small>{work.label}</small><b>{work.title}</b><ArrowUpRight size={14} /></span></>
-              const props = { className: `reference-card reference-card-${index + 1}${opening === work.title ? ' is-opening' : ''}`, 'aria-label': `查看${work.title}`, 'data-priority': index >= 3 && index <= 5, ref: el => cardRefs.current[index] = el, onPointerMove: e => handleCardTilt(e, index), onPointerLeave: () => handleCardTiltReset(index), onClick: event => openWork(event, work) }
+              const props = { className: `reference-card reference-card-${index + 1}`, 'aria-label': `查看${work.title}`, 'data-priority': index >= 3 && index <= 5, ref: el => cardRefs.current[index] = el, onClick: event => openWork(event, work) }
               return work.href ? <a key={work.title} {...props} href={work.href} draggable={false}>{content}</a> : <button key={work.title} {...props} type="button">{content}</button>
             })}
           </div>

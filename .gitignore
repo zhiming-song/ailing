@@ -13,6 +13,12 @@
 **/*.db
 nginx-gateway/data/
 
+# Keep local portfolio videos out of the repository while retaining poster images.
+/public/videos/**/*.mp4
+/public/videos/**/*.m4v
+/public/videos/**/*.mov
+/public/videos/**/*.webm
+
 # Editor and operating-system files
 .agents/
 **/.DS_Store
