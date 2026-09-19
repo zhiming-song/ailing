@@ -499,10 +499,10 @@ app.get('/api/analytics/report', requireAdmin, async (request, response) => {
           ROW_NUMBER() OVER (
             PARTITION BY DATE(created_at), ip_address
             ORDER BY created_at DESC, id DESC
-          ) AS row_number
+          ) AS rn
         FROM analytics_events WHERE ${where}
       ) AS daily_recent
-      WHERE row_number = 1
+      WHERE rn = 1
       ORDER BY visitedAt DESC LIMIT ? OFFSET ?
     `
   } else {
