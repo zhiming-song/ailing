@@ -256,6 +256,28 @@ function getVideoDetails(video) {
 }
 
 /**
+ * 获取图片对应的稳定标识和标题
+ *
+ * @param image 图片元素
+ * @return 图片描述信息
+ */
+function getImageDetails(image) {
+  const source = image.currentSrc || image.src || ''
+  let imageId = source
+
+  try {
+    imageId = new URL(source, window.location.origin).pathname
+  } catch {
+    imageId = source
+  }
+
+  return {
+    imageId: imageId.slice(0, 500),
+    imageTitle: (image.alt || image.getAttribute('aria-label') || imageId).slice(0, 255),
+  }
+}
+
+/**
  * 处理视频首次播放事件
  *
  * @param video 视频元素
@@ -314,6 +336,12 @@ export function initAnalytics() {
 
   document.addEventListener('play', (event) => {
     if (event.target instanceof HTMLVideoElement) handleVideoPlay(event.target)
+  }, true)
+
+  document.addEventListener('click', (event) => {
+    if (!(event.target instanceof Element)) return
+    const image = event.target.closest('img')
+    if (image) trackEvent('image_view', getImageDetails(image))
   }, true)
 
   document.addEventListener('timeupdate', (event) => {

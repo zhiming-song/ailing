@@ -7,7 +7,7 @@ const app = express()
 const port = Number(process.env.PORT || 3000)
 const databaseRetryDelay = 3000
 const databaseRetryLimit = 20
-const allowedEventTypes = new Set(['page_view', 'video_play', 'video_progress', 'video_complete'])
+const allowedEventTypes = new Set(['page_view', 'video_play', 'video_progress', 'video_complete', 'image_view'])
 
 const pool = mysql.createPool({
   host: process.env.DB_HOST || 'ailing-mysql',
@@ -33,6 +33,18 @@ app.use(express.json({ limit: '64kb', type: ['application/json', 'text/plain'] }
 function cleanString(value, maxLength) {
   if (typeof value !== 'string') return ''
   return value.trim().slice(0, maxLength)
+}
+
+/**
+ * 规范化页面路径
+ *
+ * @param value 原始页面路径
+ * @return 统一后的页面路径
+ */
+function normalizePagePath(value) {
+  const path = cleanString(value, 500)
+  if (!path || path === '/') return '/'
+  return path.replace(/\/+$/, '') || '/'
 }
 
 /**
@@ -109,6 +121,8 @@ async function ensureSchema() {
       video_current_time INT UNSIGNED NOT NULL DEFAULT 0,
       video_duration INT UNSIGNED NOT NULL DEFAULT 0,
       video_milestone TINYINT UNSIGNED NOT NULL DEFAULT 0,
+      image_id VARCHAR(500) NOT NULL DEFAULT '',
+      image_title VARCHAR(255) NOT NULL DEFAULT '',
       ip_address VARCHAR(45) NOT NULL DEFAULT '',
       user_agent VARCHAR(1000) NOT NULL DEFAULT '',
       device_type VARCHAR(32) NOT NULL DEFAULT '',
@@ -144,6 +158,8 @@ async function ensureSchema() {
     device_model: "VARCHAR(150) NOT NULL DEFAULT ''",
     operating_system: "VARCHAR(100) NOT NULL DEFAULT ''",
     browser: "VARCHAR(100) NOT NULL DEFAULT ''",
+    image_id: "VARCHAR(500) NOT NULL DEFAULT ''",
+    image_title: "VARCHAR(255) NOT NULL DEFAULT ''",
     country: "VARCHAR(8) NOT NULL DEFAULT ''",
     region: "VARCHAR(100) NOT NULL DEFAULT ''",
     city: "VARCHAR(150) NOT NULL DEFAULT ''",
@@ -256,7 +272,7 @@ function normalizeEvent(event, requestContext) {
     cleanString(event?.type, 32),
     cleanString(event?.visitorId, 64),
     cleanString(event?.sessionId, 64),
-    cleanString(event?.path, 500),
+    normalizePagePath(event?.path),
     cleanString(event?.title, 255),
     cleanString(event?.referrer, 1000),
     cleanString(event?.videoId, 255),
@@ -264,6 +280,8 @@ function normalizeEvent(event, requestContext) {
     Math.max(0, Math.round(Number(event?.currentTime) || 0)),
     Math.max(0, Math.round(Number(event?.duration) || 0)),
     Math.min(100, Math.max(0, Math.round(Number(event?.milestone) || 0))),
+    cleanString(event?.imageId, 500),
+    cleanString(event?.imageTitle, 255),
     requestContext.ipAddress,
     requestContext.userAgent,
     cleanString(event?.deviceType, 32) || fallbackDevice.deviceType,
@@ -313,12 +331,12 @@ app.post('/api/analytics/events', async (request, response) => {
       location: getIpLocation(ipAddress),
     }
     const values = validEvents.map((event) => normalizeEvent(event, requestContext))
-    const placeholders = values.map(() => '(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)').join(', ')
+    const placeholders = values.map(() => '(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)').join(', ')
     await pool.query(`
       INSERT IGNORE INTO analytics_events (
         event_id, event_type, visitor_id, session_id, page_path, page_title,
         referrer, video_id, video_title, video_current_time, video_duration,
-        video_milestone, ip_address, user_agent, device_type, device_brand,
+        video_milestone, image_id, image_title, ip_address, user_agent, device_type, device_brand,
         device_model, operating_system, browser, country, region, city,
         latitude, longitude, campaign, occurred_at
       ) VALUES ${placeholders}
@@ -445,14 +463,15 @@ app.get('/api/analytics/report', requireAdmin, async (request, response) => {
   if (type === 'pages') {
     reportClauses.push("event_type = 'page_view'")
     const where = reportClauses.join(' AND ')
-    countSql = `SELECT COUNT(DISTINCT page_path) AS total FROM analytics_events WHERE ${where}`
+    const normalizedPath = "CASE WHEN TRIM(page_path) = '/' THEN '/' ELSE COALESCE(NULLIF(TRIM(TRAILING '/' FROM TRIM(page_path)), ''), '/') END"
+    countSql = `SELECT COUNT(DISTINCT ${normalizedPath}) AS total FROM analytics_events WHERE ${where}`
     dataSql = `
-      SELECT page_path AS path, COUNT(*) AS views, COUNT(DISTINCT visitor_id) AS visitors
+      SELECT ${normalizedPath} AS path, COUNT(*) AS views, COUNT(DISTINCT visitor_id) AS visitors
       FROM analytics_events WHERE ${where}
-      GROUP BY page_path ORDER BY views DESC LIMIT ? OFFSET ?
+      GROUP BY ${normalizedPath} ORDER BY views DESC LIMIT ? OFFSET ?
     `
   } else if (type === 'videos') {
-    reportClauses.push("video_id <> ''")
+    reportClauses.push("event_type IN ('video_play', 'video_complete')", "video_id <> ''")
     const where = reportClauses.join(' AND ')
     countSql = `SELECT COUNT(DISTINCT video_id) AS total FROM analytics_events WHERE ${where}`
     dataSql = `
@@ -465,13 +484,26 @@ app.get('/api/analytics/report', requireAdmin, async (request, response) => {
   } else if (type === 'recent') {
     reportClauses.push("event_type = 'page_view'")
     const where = reportClauses.join(' AND ')
-    countSql = `SELECT COUNT(*) AS total FROM analytics_events WHERE ${where}`
-    dataSql = `
-      SELECT created_at AS visitedAt, ip_address AS ip, page_path AS path, referrer,
-        device_type AS deviceType, device_brand AS deviceBrand, device_model AS deviceModel,
-        operating_system AS operatingSystem, browser, country, region, city
+    countSql = `SELECT COUNT(*) AS total FROM (
+      SELECT DATE(created_at) AS visit_day, ip_address
       FROM analytics_events WHERE ${where}
-      ORDER BY created_at DESC LIMIT ? OFFSET ?
+      GROUP BY DATE(created_at), ip_address
+    ) AS daily_ips`
+    dataSql = `
+      SELECT visitedAt, ip, path, referrer, deviceType, deviceBrand, deviceModel,
+        operatingSystem, browser, country, region, city
+      FROM (
+        SELECT created_at AS visitedAt, ip_address AS ip, page_path AS path, referrer,
+          device_type AS deviceType, device_brand AS deviceBrand, device_model AS deviceModel,
+          operating_system AS operatingSystem, browser, country, region, city,
+          ROW_NUMBER() OVER (
+            PARTITION BY DATE(created_at), ip_address
+            ORDER BY created_at DESC, id DESC
+          ) AS row_number
+        FROM analytics_events WHERE ${where}
+      ) AS daily_recent
+      WHERE row_number = 1
+      ORDER BY visitedAt DESC LIMIT ? OFFSET ?
     `
   } else {
     response.status(400).json({ ok: false, message: 'Invalid report type' })
@@ -499,22 +531,40 @@ app.get('/api/analytics/ip-visits', requireAdmin, async (request, response) => {
 
   const { page, pageSize, offset } = getPagination(request.query)
   const { clauses, params } = buildAnalyticsFilters({ ...request.query, ip: '' })
-  clauses.push("event_type = 'page_view'", 'ip_address = ?')
-  params.push(ip)
-  const where = clauses.join(' AND ')
+  const pageClauses = [...clauses, "event_type IN ('page_view', 'video_play', 'video_complete', 'image_view')", 'ip_address = ?']
+  const pageParams = [...params, ip]
+  const statsWhere = [...clauses, 'ip_address = ?'].join(' AND ')
+  const statsParams = [...params, ip]
+  const pageWhere = pageClauses.join(' AND ')
 
   try {
-    const [[countRows], [items]] = await Promise.all([
-      pool.query(`SELECT COUNT(*) AS total FROM analytics_events WHERE ${where}`, params),
+    const [[countRows], [items], [statsRows]] = await Promise.all([
+      pool.query(`SELECT COUNT(*) AS total FROM analytics_events WHERE ${pageWhere}`, pageParams),
       pool.query(`
-        SELECT created_at AS visitedAt, page_path AS path, page_title AS title, referrer,
+        SELECT created_at AS visitedAt, event_type AS activityType,
+          page_path AS path, page_title AS pageTitle, video_id AS videoId,
+          video_title AS videoTitle, image_id AS imageId, image_title AS imageTitle,
           device_type AS deviceType, device_brand AS deviceBrand, device_model AS deviceModel,
           operating_system AS operatingSystem, browser, country, region, city
-        FROM analytics_events WHERE ${where}
+        FROM analytics_events WHERE ${pageWhere}
         ORDER BY created_at DESC LIMIT ? OFFSET ?
-      `, [...params, pageSize, offset]),
+      `, [...pageParams, pageSize, offset]),
+      pool.query(`
+        SELECT
+          SUM(event_type = 'video_play') AS videoPlays,
+          SUM(event_type = 'video_complete') AS videoCompletions
+        FROM analytics_events WHERE ${statsWhere}
+      `, statsParams),
     ])
-    response.json({ ip, ...createPagedResult(items, Number(countRows[0]?.total || 0), page, pageSize) })
+    const stats = statsRows[0] || {}
+    response.json({
+      ip,
+      stats: {
+        videoPlays: Number(stats.videoPlays || 0),
+        videoCompletions: Number(stats.videoCompletions || 0),
+      },
+      ...createPagedResult(items, Number(countRows[0]?.total || 0), page, pageSize),
+    })
   } catch (error) {
     console.error('Failed to load IP visits', error)
     response.status(500).json({ ok: false })

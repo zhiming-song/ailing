@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Activity, ChevronLeft, ChevronRight, Eye, Globe2, LockKeyhole, LogOut, PlayCircle, RefreshCw, Search, Users, X } from 'lucide-react'
 
 const AUTH_STORAGE_KEY = 'ailing_analytics_authorization'
@@ -147,6 +147,28 @@ function ReportTable({ type, items, onOpenIp }) {
 }
 
 /**
+ * 格式化访问活动类型
+ *
+ * @param type 活动类型
+ * @return 活动名称
+ */
+function formatActivityType(type) {
+  return { page_view: '页面', video_play: '视频播放', video_complete: '视频完成', image_view: '图片' }[type] || '访问'
+}
+
+/**
+ * 获取访问活动展示内容
+ *
+ * @param item 访问活动
+ * @return 活动内容
+ */
+function getActivityContent(item) {
+  if (item.activityType === 'video_play' || item.activityType === 'video_complete') return item.videoTitle || item.videoId || '未命名视频'
+  if (item.activityType === 'image_view') return item.imageTitle || item.imageId || '未命名图片'
+  return item.path || '/'
+}
+
+/**
  * 展示指定 IP 的访问明细
  *
  * @param detail IP 明细状态
@@ -158,7 +180,8 @@ function IpDetailPanel({ detail, onClose, onPageChange }) {
   if (!detail) return null
   return <div className="fixed inset-0 z-50 flex justify-end bg-black/65 backdrop-blur-sm" role="dialog" aria-modal="true" aria-labelledby="ip-detail-title" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose() }}><aside className="flex h-full w-full max-w-3xl flex-col border-l border-white/10 bg-[#0d1811] shadow-2xl shadow-black/50">
     <header className="flex items-start justify-between gap-4 border-b border-white/10 px-5 py-5 sm:px-7"><div><p className="m-0 text-xs tracking-[0.18em] text-lime-300">IP VISIT DETAIL</p><h2 id="ip-detail-title" className="mb-0 mt-1 font-mono text-xl text-white">{detail.ip}</h2><p className="mb-0 mt-2 text-sm text-emerald-100/45">共访问 {formatNumber(detail.pagination?.total)} 次</p></div><button className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 text-emerald-50/70 hover:text-white" type="button" aria-label="关闭" onClick={onClose}><X size={18} /></button></header>
-    <div className="flex-1 overflow-auto">{detail.loading ? <div className="flex h-56 items-center justify-center"><RefreshCw className="animate-spin text-lime-300" size={22} /></div> : detail.error ? <p className="m-5 rounded-xl border border-red-300/20 bg-red-400/10 px-4 py-3 text-sm text-red-100">{detail.error}</p> : <table className="w-full min-w-2xl border-collapse text-left text-sm"><thead className="sticky top-0 bg-[#0d1811] text-xs text-emerald-100/40"><tr><th className="px-5 py-3 font-medium">访问时间</th><th className="px-5 py-3 font-medium">访问页面</th><th className="px-5 py-3 font-medium">来源</th></tr></thead><tbody className="divide-y divide-white/6">{detail.items?.length ? detail.items.map((item, index) => <tr className="text-emerald-50/70" key={`${item.visitedAt}-${item.path}-${index}`}><td className="whitespace-nowrap px-5 py-3.5">{formatDateTime(item.visitedAt)}</td><td className="max-w-72 px-5 py-3.5 text-white"><span className="block truncate" title={item.path}>{item.path}</span>{item.title && <span className="mt-1 block truncate text-xs text-emerald-100/35">{item.title}</span>}</td><td className="max-w-64 truncate px-5 py-3.5" title={item.referrer || ''}>{item.referrer || '-'}</td></tr>) : <EmptyRow colSpan={3} />}</tbody></table>}</div>
+    <div className="grid grid-cols-2 gap-3 border-b border-white/8 p-5"><div className="rounded-xl border border-white/8 bg-white/[0.04] px-4 py-3"><p className="m-0 text-xs text-emerald-100/45">视频访问/播放</p><strong className="mt-1 block text-2xl text-lime-200">{formatNumber(detail.stats?.videoPlays)}</strong></div><div className="rounded-xl border border-white/8 bg-white/[0.04] px-4 py-3"><p className="m-0 text-xs text-emerald-100/45">视频完成</p><strong className="mt-1 block text-2xl text-lime-200">{formatNumber(detail.stats?.videoCompletions)}</strong></div></div>
+    <div className="flex-1 overflow-auto">{detail.loading ? <div className="flex h-56 items-center justify-center"><RefreshCw className="animate-spin text-lime-300" size={22} /></div> : detail.error ? <p className="m-5 rounded-xl border border-red-300/20 bg-red-400/10 px-4 py-3 text-sm text-red-100">{detail.error}</p> : <table className="w-full min-w-2xl border-collapse text-left text-sm"><thead className="sticky top-0 bg-[#0d1811] text-xs text-emerald-100/40"><tr><th className="px-5 py-3 font-medium">访问时间</th><th className="px-5 py-3 font-medium">类型</th><th className="px-5 py-3 font-medium">访问内容</th></tr></thead><tbody className="divide-y divide-white/6">{detail.items?.length ? detail.items.map((item, index) => <tr className="text-emerald-50/70" key={`${item.visitedAt}-${item.activityType}-${index}`}><td className="whitespace-nowrap px-5 py-3.5">{formatDateTime(item.visitedAt)}</td><td className="whitespace-nowrap px-5 py-3.5"><span className="rounded-full border border-lime-300/20 bg-lime-300/8 px-2.5 py-1 text-xs text-lime-200">{formatActivityType(item.activityType)}</span></td><td className="max-w-xl truncate px-5 py-3.5 text-white" title={getActivityContent(item)}>{getActivityContent(item)}</td></tr>) : <EmptyRow colSpan={3} />}</tbody></table>}</div>
     {!detail.loading && !detail.error && <Pagination pagination={detail.pagination} onChange={onPageChange} />}
   </aside></div>
 }
@@ -182,6 +205,7 @@ export default function AnalyticsDashboard() {
   const [error, setError] = useState('')
   const [updatedAt, setUpdatedAt] = useState(null)
   const [ipDetail, setIpDetail] = useState(null)
+  const reportRequestRef = useRef(0)
 
   const handleUnauthorized = useCallback(() => {
     window.sessionStorage.removeItem(AUTH_STORAGE_KEY)
@@ -193,6 +217,7 @@ export default function AnalyticsDashboard() {
 
   const loadDashboard = useCallback(async () => {
     if (!authorization) return
+    const requestId = ++reportRequestRef.current
     setLoading(true)
     setError('')
     const common = { days, ...filters }
@@ -201,19 +226,21 @@ export default function AnalyticsDashboard() {
         fetch(`${API_BASE}/summary?${createQuery(common)}`, { headers: { Authorization: authorization }, cache: 'no-store' }),
         fetch(`${API_BASE}/report?${createQuery({ ...common, type: reportType, page, pageSize })}`, { headers: { Authorization: authorization }, cache: 'no-store' }),
       ])
-      if (summaryResponse.status === 401 || reportResponse.status === 401) {
+      if (requestId === reportRequestRef.current && (summaryResponse.status === 401 || reportResponse.status === 401)) {
         handleUnauthorized()
         return
       }
       if (!summaryResponse.ok || !reportResponse.ok) throw new Error('数据加载失败')
       const [nextSummary, nextReport] = await Promise.all([summaryResponse.json(), reportResponse.json()])
+      if (requestId !== reportRequestRef.current) return
       setSummary(nextSummary)
       setReport(nextReport)
       setUpdatedAt(new Date())
     } catch (requestError) {
+      if (requestId !== reportRequestRef.current) return
       setError(requestError.message || '数据加载失败')
     } finally {
-      setLoading(false)
+      if (requestId === reportRequestRef.current) setLoading(false)
     }
   }, [authorization, days, filters, reportType, page, pageSize, handleUnauthorized])
 
@@ -293,7 +320,7 @@ export default function AnalyticsDashboard() {
         <input className="rounded-lg border border-white/10 bg-black/20 px-3 py-2 text-sm text-white outline-none placeholder:text-emerald-100/25 focus:border-lime-300/50" placeholder="国家/地区/城市" value={draftFilters.location} onChange={(event) => setDraftFilters((value) => ({ ...value, location: event.target.value }))} />
         <button className="flex items-center justify-center gap-2 rounded-lg bg-lime-300 px-4 py-2 text-sm font-semibold text-[#122015] hover:bg-lime-200" type="submit"><Search size={15} />查询</button><button className="rounded-lg border border-white/10 px-4 py-2 text-sm text-emerald-50/65 hover:text-white" type="button" onClick={resetFilters}>重置</button>
       </form></div></div>
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/8 px-5"><div className="flex overflow-x-auto">{REPORT_TABS.map((tab) => <button className={`border-b-2 px-4 py-4 text-sm transition ${reportType === tab.key ? 'border-lime-300 text-lime-200' : 'border-transparent text-emerald-100/45 hover:text-white'}`} key={tab.key} type="button" onClick={() => { setReportType(tab.key); setPage(1) }}>{tab.label}</button>)}</div><label className="flex items-center gap-2 text-xs text-emerald-100/45">每页<select className="rounded-lg border border-white/10 bg-[#122018] px-2 py-1.5 text-sm text-white outline-none" value={pageSize} onChange={(event) => { setPageSize(Number(event.target.value)); setPage(1) }}><option value="10">10 条</option><option value="20">20 条</option><option value="50">50 条</option></select></label></div>
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/8 px-5"><div className="flex overflow-x-auto">{REPORT_TABS.map((tab) => <button className={`border-b-2 px-4 py-4 text-sm transition ${reportType === tab.key ? 'border-lime-300 text-lime-200' : 'border-transparent text-emerald-100/45 hover:text-white'}`} key={tab.key} type="button" onClick={() => { reportRequestRef.current += 1; setReportType(tab.key); setPage(1); setReport({ items: [], pagination: null }) }}>{tab.label}</button>)}</div><label className="flex items-center gap-2 text-xs text-emerald-100/45">每页<select className="rounded-lg border border-white/10 bg-[#122018] px-2 py-1.5 text-sm text-white outline-none" value={pageSize} onChange={(event) => { setPageSize(Number(event.target.value)); setPage(1) }}><option value="10">10 条</option><option value="20">20 条</option><option value="50">50 条</option></select></label></div>
       <div className={`overflow-x-auto transition-opacity ${loading ? 'opacity-55' : 'opacity-100'}`}><ReportTable type={reportType} items={report.items || []} onOpenIp={(ip) => loadIpVisits(ip, 1)} /></div><Pagination pagination={report.pagination} onChange={setPage} />
     </section>
   </div><IpDetailPanel detail={ipDetail} onClose={() => setIpDetail(null)} onPageChange={(nextPage) => loadIpVisits(ipDetail.ip, nextPage)} /></main>
