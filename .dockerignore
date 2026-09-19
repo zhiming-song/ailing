@@ -6,3 +6,5 @@ dist
 .env
 .env.*
 design-qa.md
+output
+outputs

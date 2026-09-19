@@ -15,5 +15,7 @@
     "react-dom": "latest",
     "lucide-react": "latest"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "unocss": "^66.10.5"
+  }
 }

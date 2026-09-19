@@ -1,6 +1,7 @@
 import { StrictMode, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { createRoot } from 'react-dom/client'
 import ReferenceHome from './ReferenceHome'
+import AnalyticsDashboard from './AnalyticsDashboard'
 import { ArrowDownRight, ArrowUpRight, ChevronLeft, ChevronRight, Maximize2, Pause, Play, Volume2, VolumeX } from 'lucide-react'
 import shipingImage from './assets/shiping.jpg'
 import shortMovieImage from './assets/shortMovie.jpg'
@@ -30,8 +31,10 @@ import momoLogo from './assets/logo-momo.png'
 import yuanliLogo from './assets/logo-yuanli.png'
 import nioLogo from './assets/logo-nio.png'
 import wechatQr from './assets/wechat-qr.jpg'
+import { initAnalytics } from './utils/analytics'
 import './styles.css'
 import './portfolio-theme.css'
+import 'virtual:uno.css'
 
 const experiences = [
   {
@@ -656,7 +659,7 @@ function ModalWorksHome() {
   </main>
 }
 
-function App() {
+function PortfolioApp() {
   const [activeTab, setActiveTab] = useState('长视频')
   const [heroOffset, setHeroOffset] = useState({ x: 0, y: 0 })
   const [activeSkill, setActiveSkill] = useState('')
@@ -835,4 +838,18 @@ useEffect(() => {
   )
 }
 
+/**
+ * 根据当前路径选择作品集或隐藏监控页面
+ *
+ * @return 当前路由页面
+ */
+function App() {
+  const currentPath = window.location.pathname.replace(/\/+$/, '') || '/'
+  const analyticsPath = `${import.meta.env.BASE_URL}analytics`.replace(/\/+$/, '')
+
+  if (currentPath === analyticsPath || currentPath === '/analytics') return <AnalyticsDashboard />
+  return <PortfolioApp />
+}
+
 createRoot(document.getElementById('root')).render(<StrictMode><App /></StrictMode>)
+initAnalytics()
