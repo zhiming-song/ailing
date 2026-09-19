@@ -10,6 +10,103 @@ let queue = []
 const videoStates = new WeakMap()
 
 /**
+ * 根据浏览器信息推断设备品牌
+ *
+ * @param userAgent 浏览器 User-Agent
+ * @param model 浏览器提供的设备型号
+ * @return 设备品牌
+ */
+function detectDeviceBrand(userAgent, model) {
+  const value = `${model} ${userAgent}`
+  if (/iPhone|iPad|Macintosh/i.test(value)) return 'Apple'
+  if (/Samsung|SM-/i.test(value)) return 'Samsung'
+  if (/Huawei|HUAWEI/i.test(value)) return 'Huawei'
+  if (/Honor|HONOR/i.test(value)) return 'Honor'
+  if (/Xiaomi|Redmi|Mi\s/i.test(value)) return 'Xiaomi'
+  if (/OPPO|CPH\d+/i.test(value)) return 'OPPO'
+  if (/vivo/i.test(value)) return 'vivo'
+  if (/OnePlus/i.test(value)) return 'OnePlus'
+  if (/Pixel/i.test(value)) return 'Google'
+  return ''
+}
+
+/**
+ * 从 User-Agent 中提取 Android 设备型号
+ *
+ * @param userAgent 浏览器 User-Agent
+ * @return 设备型号
+ */
+function detectAndroidModel(userAgent) {
+  const match = userAgent.match(/Android[^;]*;\s*(?:[a-z]{2}(?:[-_][A-Z]{2})?;\s*)?([^;)]+?)(?:\s+Build\/|;|\))/i)
+  return match?.[1]?.trim() || ''
+}
+
+/**
+ * 从浏览器信息中识别操作系统
+ *
+ * @param userAgent 浏览器 User-Agent
+ * @param platform 浏览器平台
+ * @return 操作系统
+ */
+function detectOperatingSystem(userAgent, platform) {
+  if (/iPhone|iPad|iPod/i.test(userAgent)) return 'iOS'
+  if (/Android/i.test(userAgent)) return 'Android'
+  if (/Windows/i.test(userAgent) || /Win/i.test(platform)) return 'Windows'
+  if (/Macintosh|Mac OS/i.test(userAgent) || /Mac/i.test(platform)) return 'macOS'
+  if (/Linux/i.test(userAgent) || /Linux/i.test(platform)) return 'Linux'
+  return platform || 'Unknown'
+}
+
+/**
+ * 从 User-Agent 中识别浏览器
+ *
+ * @param userAgent 浏览器 User-Agent
+ * @return 浏览器名称
+ */
+function detectBrowser(userAgent) {
+  if (/Edg\//i.test(userAgent)) return 'Edge'
+  if (/OPR\//i.test(userAgent)) return 'Opera'
+  if (/CriOS|Chrome\//i.test(userAgent)) return 'Chrome'
+  if (/FxiOS|Firefox\//i.test(userAgent)) return 'Firefox'
+  if (/Safari\//i.test(userAgent)) return 'Safari'
+  return 'Unknown'
+}
+
+/**
+ * 收集浏览器允许提供的设备信息
+ *
+ * @return 设备信息
+ */
+async function collectDeviceContext() {
+  const userAgent = navigator.userAgent || ''
+  const userAgentData = navigator.userAgentData
+  let hints = {}
+
+  try {
+    hints = userAgentData?.getHighEntropyValues
+      ? await userAgentData.getHighEntropyValues(['model', 'platformVersion'])
+      : {}
+  } catch {
+    hints = {}
+  }
+
+  const platform = hints.platform || userAgentData?.platform || navigator.platform || ''
+  const isTablet = /iPad|Tablet/i.test(userAgent) || (/Android/i.test(userAgent) && !/Mobile/i.test(userAgent))
+  const isMobile = Boolean(userAgentData?.mobile) || /Mobile|iPhone|Android/i.test(userAgent)
+  const model = hints.model || (/iPhone/i.test(userAgent) ? 'iPhone' : /iPad/i.test(userAgent) ? 'iPad' : detectAndroidModel(userAgent))
+
+  return {
+    deviceType: isTablet ? 'tablet' : isMobile ? 'mobile' : 'desktop',
+    deviceBrand: detectDeviceBrand(userAgent, model),
+    deviceModel: model,
+    operatingSystem: detectOperatingSystem(userAgent, platform),
+    browser: detectBrowser(userAgent),
+  }
+}
+
+const deviceContextPromise = collectDeviceContext()
+
+/**
  * 生成浏览器侧匿名标识
  *
  * @return 匿名标识
@@ -107,9 +204,10 @@ function scheduleFlush() {
  * @param details 事件明细
  * @return 无返回值
  */
-export function trackEvent(type, details = {}) {
+export async function trackEvent(type, details = {}) {
   const visitorId = getStoredId(window.localStorage, 'ailing_analytics_visitor')
   const sessionId = getStoredId(window.sessionStorage, 'ailing_analytics_session')
+  const device = await deviceContextPromise
 
   queue.push({
     eventId: createId(),
@@ -121,6 +219,7 @@ export function trackEvent(type, details = {}) {
     referrer: document.referrer,
     occurredAt: new Date().toISOString(),
     campaign: getCampaign(),
+    ...device,
     ...details,
   })
 

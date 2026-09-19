@@ -1,9 +1,12 @@
 import crypto from 'node:crypto'
 import express from 'express'
+import geoip from 'geoip-lite'
 import mysql from 'mysql2/promise'
 
 const app = express()
 const port = Number(process.env.PORT || 3000)
+const databaseRetryDelay = 3000
+const databaseRetryLimit = 20
 const allowedEventTypes = new Set(['page_view', 'video_play', 'video_progress', 'video_complete'])
 
 const pool = mysql.createPool({
@@ -78,7 +81,6 @@ function requireAdmin(request, response, next) {
   const expectedHash = crypto.createHash('sha256').update(expected).digest()
 
   if (!crypto.timingSafeEqual(suppliedHash, expectedHash)) {
-    response.set('WWW-Authenticate', 'Basic realm="Ailing Analytics", charset="UTF-8"')
     response.status(401).send('Authentication required')
     return
   }
@@ -109,6 +111,16 @@ async function ensureSchema() {
       video_milestone TINYINT UNSIGNED NOT NULL DEFAULT 0,
       ip_address VARCHAR(45) NOT NULL DEFAULT '',
       user_agent VARCHAR(1000) NOT NULL DEFAULT '',
+      device_type VARCHAR(32) NOT NULL DEFAULT '',
+      device_brand VARCHAR(100) NOT NULL DEFAULT '',
+      device_model VARCHAR(150) NOT NULL DEFAULT '',
+      operating_system VARCHAR(100) NOT NULL DEFAULT '',
+      browser VARCHAR(100) NOT NULL DEFAULT '',
+      country VARCHAR(8) NOT NULL DEFAULT '',
+      region VARCHAR(100) NOT NULL DEFAULT '',
+      city VARCHAR(150) NOT NULL DEFAULT '',
+      latitude DECIMAL(10, 7) NULL,
+      longitude DECIMAL(10, 7) NULL,
       campaign JSON NULL,
       occurred_at DATETIME(3) NOT NULL,
       created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -119,6 +131,112 @@ async function ensureSchema() {
       KEY idx_video_created_at (video_id(191), created_at)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
   `)
+
+  const [columns] = await pool.query(`
+    SELECT COLUMN_NAME AS name
+    FROM information_schema.COLUMNS
+    WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'analytics_events'
+  `)
+  const existingColumns = new Set(columns.map((column) => column.name))
+  const requiredColumns = {
+    device_type: "VARCHAR(32) NOT NULL DEFAULT ''",
+    device_brand: "VARCHAR(100) NOT NULL DEFAULT ''",
+    device_model: "VARCHAR(150) NOT NULL DEFAULT ''",
+    operating_system: "VARCHAR(100) NOT NULL DEFAULT ''",
+    browser: "VARCHAR(100) NOT NULL DEFAULT ''",
+    country: "VARCHAR(8) NOT NULL DEFAULT ''",
+    region: "VARCHAR(100) NOT NULL DEFAULT ''",
+    city: "VARCHAR(150) NOT NULL DEFAULT ''",
+    latitude: 'DECIMAL(10, 7) NULL',
+    longitude: 'DECIMAL(10, 7) NULL',
+  }
+  const missingColumns = Object.entries(requiredColumns).filter(([name]) => !existingColumns.has(name))
+
+  if (missingColumns.length) {
+    const additions = missingColumns.map(([name, definition]) => `ADD COLUMN \`${name}\` ${definition}`).join(', ')
+    await pool.execute(`ALTER TABLE analytics_events ${additions}`)
+  }
+}
+
+/**
+ * 等待 MySQL TCP 服务完成启动
+ *
+ * @return 数据库就绪任务
+ */
+async function waitForDatabase() {
+  for (let attempt = 1; attempt <= databaseRetryLimit; attempt += 1) {
+    try {
+      await ensureSchema()
+      return
+    } catch (error) {
+      if (attempt === databaseRetryLimit) throw error
+      console.warn(`Database unavailable retrying ${attempt}/${databaseRetryLimit}`)
+      await new Promise((resolve) => setTimeout(resolve, databaseRetryDelay))
+    }
+  }
+}
+
+/**
+ * 从 User-Agent 中解析服务端设备回退信息
+ *
+ * @param userAgent 浏览器 User-Agent
+ * @return 设备信息
+ */
+function parseUserAgent(userAgent) {
+  const isTablet = /iPad|Tablet/i.test(userAgent) || (/Android/i.test(userAgent) && !/Mobile/i.test(userAgent))
+  const isMobile = /Mobile|iPhone|Android/i.test(userAgent)
+  const androidModel = userAgent.match(/Android[^;]*;\s*(?:[a-z]{2}(?:[-_][A-Z]{2})?;\s*)?([^;)]+?)(?:\s+Build\/|;|\))/i)?.[1]?.trim() || ''
+  const model = /iPhone/i.test(userAgent) ? 'iPhone' : /iPad/i.test(userAgent) ? 'iPad' : androidModel
+  let brand = ''
+  let operatingSystem = ''
+  let browser = ''
+
+  if (/iPhone|iPad|Macintosh/i.test(userAgent)) brand = 'Apple'
+  else if (/Samsung|SM-/i.test(userAgent)) brand = 'Samsung'
+  else if (/Huawei|HUAWEI/i.test(userAgent)) brand = 'Huawei'
+  else if (/Honor|HONOR/i.test(userAgent)) brand = 'Honor'
+  else if (/Xiaomi|Redmi|Mi\s/i.test(userAgent)) brand = 'Xiaomi'
+  else if (/OPPO|CPH\d+/i.test(userAgent)) brand = 'OPPO'
+  else if (/vivo/i.test(userAgent)) brand = 'vivo'
+  else if (/OnePlus/i.test(userAgent)) brand = 'OnePlus'
+  else if (/Pixel/i.test(userAgent)) brand = 'Google'
+
+  if (/iPhone|iPad|iPod/i.test(userAgent)) operatingSystem = 'iOS'
+  else if (/Android/i.test(userAgent)) operatingSystem = 'Android'
+  else if (/Windows/i.test(userAgent)) operatingSystem = 'Windows'
+  else if (/Macintosh|Mac OS/i.test(userAgent)) operatingSystem = 'macOS'
+  else if (/Linux/i.test(userAgent)) operatingSystem = 'Linux'
+
+  if (/Edg\//i.test(userAgent)) browser = 'Edge'
+  else if (/OPR\//i.test(userAgent)) browser = 'Opera'
+  else if (/CriOS|Chrome\//i.test(userAgent)) browser = 'Chrome'
+  else if (/FxiOS|Firefox\//i.test(userAgent)) browser = 'Firefox'
+  else if (/Safari\//i.test(userAgent)) browser = 'Safari'
+
+  return {
+    deviceType: isTablet ? 'tablet' : isMobile ? 'mobile' : 'desktop',
+    deviceBrand: brand,
+    deviceModel: model,
+    operatingSystem,
+    browser,
+  }
+}
+
+/**
+ * 使用本地 GeoIP 数据库解析 IP 地区
+ *
+ * @param ipAddress IP 地址
+ * @return 地区信息
+ */
+function getIpLocation(ipAddress) {
+  const location = geoip.lookup(ipAddress)
+  return {
+    country: cleanString(location?.country, 8),
+    region: cleanString(location?.region, 100),
+    city: cleanString(location?.city, 150),
+    latitude: Number.isFinite(location?.ll?.[0]) ? location.ll[0] : null,
+    longitude: Number.isFinite(location?.ll?.[1]) ? location.ll[1] : null,
+  }
 }
 
 /**
@@ -128,9 +246,10 @@ async function ensureSchema() {
  * @param request HTTP 请求
  * @return 数据库记录
  */
-function normalizeEvent(event, request) {
+function normalizeEvent(event, requestContext) {
   const occurredAt = new Date(event?.occurredAt)
   const validDate = Number.isNaN(occurredAt.getTime()) ? new Date() : occurredAt
+  const fallbackDevice = parseUserAgent(requestContext.userAgent)
 
   return [
     cleanString(event?.eventId, 64),
@@ -145,8 +264,18 @@ function normalizeEvent(event, request) {
     Math.max(0, Math.round(Number(event?.currentTime) || 0)),
     Math.max(0, Math.round(Number(event?.duration) || 0)),
     Math.min(100, Math.max(0, Math.round(Number(event?.milestone) || 0))),
-    getClientIp(request),
-    cleanString(request.headers['user-agent'], 1000),
+    requestContext.ipAddress,
+    requestContext.userAgent,
+    cleanString(event?.deviceType, 32) || fallbackDevice.deviceType,
+    cleanString(event?.deviceBrand, 100) || fallbackDevice.deviceBrand,
+    cleanString(event?.deviceModel, 150) || fallbackDevice.deviceModel,
+    cleanString(event?.operatingSystem, 100) || fallbackDevice.operatingSystem,
+    cleanString(event?.browser, 100) || fallbackDevice.browser,
+    requestContext.location.country,
+    requestContext.location.region,
+    requestContext.location.city,
+    requestContext.location.latitude,
+    requestContext.location.longitude,
     JSON.stringify(event?.campaign && typeof event.campaign === 'object' ? event.campaign : {}),
     validDate,
   ]
@@ -177,13 +306,21 @@ app.post('/api/analytics/events', async (request, response) => {
   }
 
   try {
-    const values = validEvents.map((event) => normalizeEvent(event, request))
-    const placeholders = values.map(() => '(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)').join(', ')
+    const ipAddress = getClientIp(request)
+    const requestContext = {
+      ipAddress,
+      userAgent: cleanString(request.headers['user-agent'], 1000),
+      location: getIpLocation(ipAddress),
+    }
+    const values = validEvents.map((event) => normalizeEvent(event, requestContext))
+    const placeholders = values.map(() => '(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)').join(', ')
     await pool.query(`
       INSERT IGNORE INTO analytics_events (
         event_id, event_type, visitor_id, session_id, page_path, page_title,
         referrer, video_id, video_title, video_current_time, video_duration,
-        video_milestone, ip_address, user_agent, campaign, occurred_at
+        video_milestone, ip_address, user_agent, device_type, device_brand,
+        device_model, operating_system, browser, country, region, city,
+        latitude, longitude, campaign, occurred_at
       ) VALUES ${placeholders}
     `, values.flat())
     response.status(202).json({ ok: true, accepted: validEvents.length })
@@ -193,13 +330,85 @@ app.post('/api/analytics/events', async (request, response) => {
   }
 })
 
-app.get('/api/analytics/summary', requireAdmin, async (request, response) => {
-  const requestedDays = Number.parseInt(request.query.days, 10)
+/**
+ * 解析报表分页参数
+ *
+ * @param query 请求查询参数
+ * @return 分页参数
+ */
+function getPagination(query) {
+  const requestedPage = Number.parseInt(query.page, 10)
+  const requestedPageSize = Number.parseInt(query.pageSize, 10)
+  const page = Number.isFinite(requestedPage) ? Math.max(1, requestedPage) : 1
+  const pageSize = [10, 20, 50].includes(requestedPageSize) ? requestedPageSize : 10
+  return { page, pageSize, offset: (page - 1) * pageSize }
+}
+
+/**
+ * 构建监控报表的公共查询条件
+ *
+ * @param query 请求查询参数
+ * @return SQL 条件和绑定参数
+ */
+function buildAnalyticsFilters(query) {
+  const requestedDays = Number.parseInt(query.days, 10)
   const days = Number.isFinite(requestedDays) ? Math.min(90, Math.max(1, requestedDays)) : 7
-  const range = `created_at >= DATE_SUB(NOW(), INTERVAL ${days} DAY)`
+  const clauses = [`created_at >= DATE_SUB(NOW(), INTERVAL ${days} DAY)`]
+  const params = []
+  const filters = {
+    ip: cleanString(query.ip, 45),
+    path: cleanString(query.path, 500),
+    device: cleanString(query.device, 150),
+    location: cleanString(query.location, 150),
+  }
+
+  if (filters.ip) {
+    clauses.push('ip_address LIKE ?')
+    params.push(`%${filters.ip}%`)
+  }
+  if (filters.path) {
+    clauses.push('page_path LIKE ?')
+    params.push(`%${filters.path}%`)
+  }
+  if (filters.device) {
+    clauses.push("CONCAT_WS(' ', device_type, device_brand, device_model, operating_system, browser) LIKE ?")
+    params.push(`%${filters.device}%`)
+  }
+  if (filters.location) {
+    clauses.push("CONCAT_WS(' ', country, region, city) LIKE ?")
+    params.push(`%${filters.location}%`)
+  }
+
+  return { days, filters, clauses, params }
+}
+
+/**
+ * 生成分页响应数据
+ *
+ * @param items 当前页数据
+ * @param total 总记录数
+ * @param page 当前页码
+ * @param pageSize 每页条数
+ * @return 分页响应
+ */
+function createPagedResult(items, total, page, pageSize) {
+  return {
+    items,
+    pagination: {
+      page,
+      pageSize,
+      total,
+      totalPages: Math.max(1, Math.ceil(total / pageSize)),
+    },
+  }
+}
+
+app.get('/api/analytics/summary', requireAdmin, async (request, response) => {
+  const { days, filters, clauses, params } = buildAnalyticsFilters(request.query)
+  const where = clauses.join(' AND ')
 
   try {
-    const [[totals], [daily], [pages], [videos], [recent]] = await Promise.all([
+    const [[totals], [daily]] = await Promise.all([
       pool.query(`
         SELECT
           SUM(event_type = 'page_view') AS pageViews,
@@ -207,47 +416,107 @@ app.get('/api/analytics/summary', requireAdmin, async (request, response) => {
           COUNT(DISTINCT IF(event_type = 'page_view', ip_address, NULL)) AS uniqueIps,
           SUM(event_type = 'video_play') AS videoPlays
         FROM analytics_events
-        WHERE ${range}
-      `),
+        WHERE ${where}
+      `, params),
       pool.query(`
         SELECT DATE(created_at) AS day, SUM(event_type = 'page_view') AS views
         FROM analytics_events
-        WHERE ${range}
+        WHERE ${where}
         GROUP BY DATE(created_at)
         ORDER BY day ASC
-      `),
-      pool.query(`
-        SELECT page_path AS path, COUNT(*) AS views, COUNT(DISTINCT visitor_id) AS visitors
-        FROM analytics_events
-        WHERE ${range} AND event_type = 'page_view'
-        GROUP BY page_path
-        ORDER BY views DESC
-        LIMIT 20
-      `),
-      pool.query(`
-        SELECT
-          video_id AS videoId,
-          MAX(video_title) AS title,
-          SUM(event_type = 'video_play') AS plays,
-          SUM(event_type = 'video_complete') AS completions
-        FROM analytics_events
-        WHERE ${range} AND video_id <> ''
-        GROUP BY video_id
-        ORDER BY plays DESC
-        LIMIT 20
-      `),
-      pool.query(`
-        SELECT created_at AS visitedAt, ip_address AS ip, page_path AS path, referrer
-        FROM analytics_events
-        WHERE ${range} AND event_type = 'page_view'
-        ORDER BY created_at DESC
-        LIMIT 30
-      `),
+      `, params),
     ])
 
-    response.json({ days, totals: totals[0] || {}, daily, pages, videos, recent })
+    response.json({ days, filters, totals: totals[0] || {}, daily })
   } catch (error) {
     console.error('Failed to load analytics summary', error)
+    response.status(500).json({ ok: false })
+  }
+})
+
+app.get('/api/analytics/report', requireAdmin, async (request, response) => {
+  const type = cleanString(request.query.type, 20)
+  const { page, pageSize, offset } = getPagination(request.query)
+  const { clauses, params } = buildAnalyticsFilters(request.query)
+  const reportClauses = [...clauses]
+  let countSql = ''
+  let dataSql = ''
+
+  if (type === 'pages') {
+    reportClauses.push("event_type = 'page_view'")
+    const where = reportClauses.join(' AND ')
+    countSql = `SELECT COUNT(DISTINCT page_path) AS total FROM analytics_events WHERE ${where}`
+    dataSql = `
+      SELECT page_path AS path, COUNT(*) AS views, COUNT(DISTINCT visitor_id) AS visitors
+      FROM analytics_events WHERE ${where}
+      GROUP BY page_path ORDER BY views DESC LIMIT ? OFFSET ?
+    `
+  } else if (type === 'videos') {
+    reportClauses.push("video_id <> ''")
+    const where = reportClauses.join(' AND ')
+    countSql = `SELECT COUNT(DISTINCT video_id) AS total FROM analytics_events WHERE ${where}`
+    dataSql = `
+      SELECT video_id AS videoId, MAX(video_title) AS title,
+        SUM(event_type = 'video_play') AS plays,
+        SUM(event_type = 'video_complete') AS completions
+      FROM analytics_events WHERE ${where}
+      GROUP BY video_id ORDER BY plays DESC LIMIT ? OFFSET ?
+    `
+  } else if (type === 'recent') {
+    reportClauses.push("event_type = 'page_view'")
+    const where = reportClauses.join(' AND ')
+    countSql = `SELECT COUNT(*) AS total FROM analytics_events WHERE ${where}`
+    dataSql = `
+      SELECT created_at AS visitedAt, ip_address AS ip, page_path AS path, referrer,
+        device_type AS deviceType, device_brand AS deviceBrand, device_model AS deviceModel,
+        operating_system AS operatingSystem, browser, country, region, city
+      FROM analytics_events WHERE ${where}
+      ORDER BY created_at DESC LIMIT ? OFFSET ?
+    `
+  } else {
+    response.status(400).json({ ok: false, message: 'Invalid report type' })
+    return
+  }
+
+  try {
+    const [[countRows], [items]] = await Promise.all([
+      pool.query(countSql, params),
+      pool.query(dataSql, [...params, pageSize, offset]),
+    ])
+    response.json(createPagedResult(items, Number(countRows[0]?.total || 0), page, pageSize))
+  } catch (error) {
+    console.error('Failed to load analytics report', error)
+    response.status(500).json({ ok: false })
+  }
+})
+
+app.get('/api/analytics/ip-visits', requireAdmin, async (request, response) => {
+  const ip = cleanString(request.query.ip, 45)
+  if (!ip) {
+    response.status(400).json({ ok: false, message: 'IP is required' })
+    return
+  }
+
+  const { page, pageSize, offset } = getPagination(request.query)
+  const { clauses, params } = buildAnalyticsFilters({ ...request.query, ip: '' })
+  clauses.push("event_type = 'page_view'", 'ip_address = ?')
+  params.push(ip)
+  const where = clauses.join(' AND ')
+
+  try {
+    const [[countRows], [items]] = await Promise.all([
+      pool.query(`SELECT COUNT(*) AS total FROM analytics_events WHERE ${where}`, params),
+      pool.query(`
+        SELECT created_at AS visitedAt, page_path AS path, page_title AS title, referrer,
+          device_type AS deviceType, device_brand AS deviceBrand, device_model AS deviceModel,
+          operating_system AS operatingSystem, browser, country, region, city
+        FROM analytics_events WHERE ${where}
+        ORDER BY created_at DESC LIMIT ? OFFSET ?
+      `, [...params, pageSize, offset]),
+    ])
+    response.json({ ip, ...createPagedResult(items, Number(countRows[0]?.total || 0), page, pageSize) })
+  } catch (error) {
+    console.error('Failed to load IP visits', error)
     response.status(500).json({ ok: false })
   }
 })
@@ -258,7 +527,7 @@ app.get('/api/analytics/summary', requireAdmin, async (request, response) => {
  * @return 启动任务
  */
 async function start() {
-  await ensureSchema()
+  await waitForDatabase()
   app.listen(port, '0.0.0.0', () => console.log(`Analytics API listening on ${port}`))
 }
 
